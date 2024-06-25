@@ -1,14 +1,6 @@
-type Card = {
-  rank: number,
-  suit: string,
-  type: 'ace' | 'face' | 'number' | 'stone'
-  enhanced: string | null,
-  special: string | null,
-  seal: string | null
-}
+//https://balatrogame.fandom.com/wiki/Card_Modifiers
 
-type Hand = Card[];
-
+import {Card, Joker} from '../types/misc-types'
 
 /**
  * Basic structure:
@@ -22,13 +14,10 @@ type Hand = Card[];
  *  Find hand type for base chips + mult
  *  Add scored cards + extras from enhance/special/seal
  *
- */
+*/
 
-
-
-
-type CheckHandfn = (hand: Hand) => {scoredCards: Hand, handType: string}
-function checkHand(hand: Hand): {scoredCards: Hand, handType: string} {
+type CheckHandfn = (hand: Card[]) => {scoredCards: Card[], handType: string}
+function checkHand(hand: Card[]): {scoredCards: Card[], handType: string} {
   return {
     scoredCards: hand,
     handType: 'pair'
@@ -37,14 +26,9 @@ function checkHand(hand: Hand): {scoredCards: Hand, handType: string} {
 checkHand satisfies CheckHandfn
 
 
-type Joker = {
-  name: string,
-  special: string,
-  price: number,
-  sellValue: number
-}
-type CheckStraightFn = (hand: Hand, jokers: Joker[]) =>
-  {scoredCards: Hand, isStraight: boolean } | null;
+
+type CheckStraightFn = (hand: Card[], jokers: Joker[]) =>
+  {scoredCards: Card[], isStraight: boolean } | null;
 
 
 /**
@@ -55,7 +39,7 @@ type CheckStraightFn = (hand: Hand, jokers: Joker[]) =>
  * @param hand
  * @param jokers
  */
-function checkStraight(hand: Hand, jokers: Joker[] = []) {
+function checkStraight(hand: Card[], jokers: Joker[] = []) {
   let gap = 1;
   let minSize = 5;
   //If joker, gap = 2, and/or minSize = 4.
@@ -101,3 +85,46 @@ function checkStraight(hand: Hand, jokers: Joker[] = []) {
 
   //if passed maxSequence, return {isStraight + scoredCards}
 }
+//FIXME: check if checkStraight satisfies CheckStraightFn
+
+
+type CheckFlushFn = (hand: Card[], jokers: Joker[]) =>
+{scoredCards: Card[], isFlush: boolean } | null;
+
+
+
+function checkFlush(hand: Card[], jokers: Joker[] = []){
+  let minSize = 5;
+  let isFlush = false;
+  //if Joker, minSize = 4.
+
+  //loop through hand. keep running count of each suit
+  //Wildcard adds to all, stone to none.
+  //loop through suit counts, if any > minSize, we have a flush.
+  //(??) if flush, loop through hand, add suit matches to scored cards (and stones)
+
+  let suitCounts = {
+    clubs: 0,
+    diamonds: 0,
+    hearts: 0,
+    spades: 0
+  }
+
+  for (let card of hand){
+    if (card.type !== "stone"){
+      suitCounts[card.suit] += 1;
+    }
+  }
+
+  type SuitKey = "clubs" | "diamonds" | "hearts" | "spades"
+  for (let key in suitCounts){
+    if (suitCounts[key as SuitKey] > minSize){
+      isFlush = true;
+    }
+  }
+
+
+}
+//FIXME: check if checkFlush satisfies CheckFlushFn
+
+
