@@ -1,52 +1,61 @@
-import {useState} from 'react'
-import {DndContext, closestCorners} from '@dnd-kit/core';
+import {useState} from 'react';
+import {DndContext,
+  DragEndEvent,
+  closestCorners,
+  MouseSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
 import {arrayMove} from '@dnd-kit/sortable';
-import Row from './Row';
-
-type Card = {
-  rank: number,
-  suit: 'clubs' | 'diamonds' | 'hearts' | 'spades' //string,
-  type: 'ace' | 'face' | 'number' | 'stone'
-  enhanced: string | null,
-  special: string | null,
-  seal: string | null
-}
+import {Card as CardType} from '../types/misc-types';
+import CardList from '../components/card-list/CardList';
 
 function DnDmain(){
-  const defaultCards = [
-    {id: 1, rank: 2, suit: 'clubs'},
-    {id: 2, rank: 3, suit: 'clubs'},
-    {id: 3, rank: 4, suit: 'clubs'},
-    {id: 4, rank: 5, suit: 'clubs'},
-    {id: 5, rank: 6, suit: 'clubs'},
+  type CardComponent = CardType & {id: number};
+  const defaultCards: CardComponent[] = [
+    {id: 1, rank: 2, suit: 'clubs', type: 'number', enhanced: null, special: null, seal: null},
+    {id: 2, rank: 3, suit: 'clubs', type: 'number', enhanced: null, special: null, seal: null},
+    {id: 3, rank: 4, suit: 'clubs', type: 'number', enhanced: null, special: null, seal: null},
+    {id: 4, rank: 5, suit: 'clubs', type: 'number', enhanced: null, special: null, seal: null},
+    {id: 5, rank: 6, suit: 'clubs', type: 'number', enhanced: null, special: null, seal: null},
   ];
-
 
   const [cards, setCards] = useState(defaultCards);
 
-  function getCardPos(id){
+
+  function getCardPos(id: number){
     return cards.findIndex(card => card.id === id);
   }
-  function handleOnDragEnd(event){
+  function handleOnDragEnd(event: DragEndEvent){
     //active is currently dragged, over is the element it's hovering over
     const {active, over} = event;
     if (active.id === over.id) return;
 
 
     setCards(prevCards => {
-      const originalPos = getCardPos(active.id);
-      const newPos = getCardPos(over.id);
+      const originalPos = getCardPos(+active.id);
+      const newPos = getCardPos(+over.id);
       return arrayMove(prevCards, originalPos, newPos);
     })
 
   }
 
+  const mouseSensor = useSensor(MouseSensor, {
+    onActivation: (event) => console.log("onActivation", event), // Here!
+    activationConstraint: { distance: 15 }
+  });
+  const sensors = useSensors(
+    mouseSensor
+  );
+
   return (
     <>
-      <DndContext collisionDetection={closestCorners} onDragEnd={handleOnDragEnd}>
-        <Row cards={cards} />
+      <DndContext sensors={sensors}
+      collisionDetection={closestCorners} onDragEnd={handleOnDragEnd}>
+        <CardList cards={cards} />
       </DndContext>
     </>
+    //<Row cards={cards} />
   )
 }
 

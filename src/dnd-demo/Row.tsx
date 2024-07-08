@@ -1,6 +1,6 @@
 
 import {SortableContext, horizontalListSortingStrategy} from "@dnd-kit/sortable"
-import Card from "./Card"
+import Card from "../components/card/Card"
 
 function Row({cards}){
 

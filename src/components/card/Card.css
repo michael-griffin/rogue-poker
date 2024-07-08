@@ -1,0 +1,8 @@
+.card {
+  background-color: #fefefe;
+}
+
+.selected {
+  background-color: aqua;
+  transform: translateY(-30px);
+}
