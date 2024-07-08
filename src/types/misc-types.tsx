@@ -14,6 +14,7 @@ export type Card = {
   seal: Seals | null
 }
 
+export type CardComponent = Card & {id: number, selected: boolean};
 // type Hand = Card[];
 
 export type Joker = {

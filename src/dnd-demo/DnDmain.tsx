@@ -7,21 +7,31 @@ import {DndContext,
   useSensors,
 } from '@dnd-kit/core';
 import {arrayMove} from '@dnd-kit/sortable';
-import {Card as CardType} from '../types/misc-types';
+import {CardComponent} from '../types/misc-types';
 import CardList from '../components/card-list/CardList';
 
 function DnDmain(){
-  type CardComponent = CardType & {id: number};
+  //type CardComponent = CardType & {id: number, selected: boolean};
   const defaultCards: CardComponent[] = [
-    {id: 1, rank: 2, suit: 'clubs', type: 'number', enhanced: null, special: null, seal: null},
-    {id: 2, rank: 3, suit: 'clubs', type: 'number', enhanced: null, special: null, seal: null},
-    {id: 3, rank: 4, suit: 'clubs', type: 'number', enhanced: null, special: null, seal: null},
-    {id: 4, rank: 5, suit: 'clubs', type: 'number', enhanced: null, special: null, seal: null},
-    {id: 5, rank: 6, suit: 'clubs', type: 'number', enhanced: null, special: null, seal: null},
+    {id: 1, selected: false, rank: 2, suit: 'clubs', type: 'number', enhanced: null, special: null, seal: null},
+    {id: 2, selected: false, rank: 3, suit: 'clubs', type: 'number', enhanced: null, special: null, seal: null},
+    {id: 3, selected: false, rank: 4, suit: 'clubs', type: 'number', enhanced: null, special: null, seal: null},
+    {id: 4, selected: false, rank: 5, suit: 'clubs', type: 'number', enhanced: null, special: null, seal: null},
+    {id: 5, selected: false, rank: 6, suit: 'clubs', type: 'number', enhanced: null, special: null, seal: null},
   ];
 
   const [cards, setCards] = useState(defaultCards);
 
+  function toggleSelected(id: number){
+    setCards(oldCards => {
+      let newCards = oldCards.map(card => {
+        const newCard = {...card};
+        if (card.id === id) newCard.selected = ! card.selected;
+        return newCard;
+      });
+      return newCards;
+    });
+  }
 
   function getCardPos(id: number){
     return cards.findIndex(card => card.id === id);
@@ -29,7 +39,7 @@ function DnDmain(){
   function handleOnDragEnd(event: DragEndEvent){
     //active is currently dragged, over is the element it's hovering over
     const {active, over} = event;
-    if (active.id === over.id) return;
+    if (over === null || active.id === over.id) return;
 
 
     setCards(prevCards => {
@@ -52,7 +62,7 @@ function DnDmain(){
     <>
       <DndContext sensors={sensors}
       collisionDetection={closestCorners} onDragEnd={handleOnDragEnd}>
-        <CardList cards={cards} />
+        <CardList cards={cards} toggleSelected={toggleSelected}/>
       </DndContext>
     </>
     //<Row cards={cards} />
