@@ -1,0 +1,106 @@
+/* Colors
+ dark grey: #333232;
+*/
+
+.stageselect {
+  background-color: #39715A;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: end;
+  gap: 20px;
+}
+
+
+
+#smallblind-column {
+  height: 90%;
+  width: 25%;
+  outline: 1px solid red;
+  background-color: #34464B;
+  padding: 20px 0px;
+}
+
+.blind-infobox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+/* stageselect button always applied,
+ one of defeated/select/upcoming/skipped applied in addition*/
+.status-button {
+  width: 70%;
+	font-size: 1.1rem;
+  font-weight: 600;
+	border-radius: 5px;
+  filter: drop-shadow(0px 4px 4px #223235); /* 27393C */
+	padding: 5px 10px;
+	display: inline-block;
+}
+.select-button {
+  background-color: #FF8F00;
+}
+.upcoming-button {
+  background-color: #264542;
+}
+.defeated-button {
+  background-color: #475354;
+  color: #535E60;
+}
+.skipped-button {
+  background-color: #264542;
+}
+
+/*blind label always applied, one of smallblind, bigblind, bossblind, or defeated*/
+.blind-label {
+  width: 80%;
+  background-color: #223235;
+  color: #F1FFFF;
+  border-radius: 5px;
+  outline: 3px solid red;
+}
+.smallblind-label {
+  background-color: #013E69;
+  outline-color: #0F6797;
+  filter: drop-shadow(0px 4px 4px #01233C);
+}
+.bigblind-label {
+  background-color: #653E03;
+  outline-color: #9D6911;
+  filter: drop-shadow(0px 10px 5px #3E2200);
+}
+.bossblind-label {
+
+}
+.defeated-label {
+  color: #9DA8AB;
+}
+
+
+.blind-circle {
+  width: 36%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+.blind-circle img {
+  flex-shrink: 0;
+  min-width: 100%;
+  min-height: 100%;
+  filter: drop-shadow(0px 2px 0px #242525);
+}
+
+
+#bigblind-column {
+  outline: 1px solid red;
+}
+
+
+
+#bossblind-column {
+  outline: 1px solid red;
+  background-color: #252525;
+}
