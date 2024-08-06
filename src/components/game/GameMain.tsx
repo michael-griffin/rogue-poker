@@ -6,6 +6,7 @@
  */
 
 import './GameMain.css'
+import StageSelect from '../stage/StageSelect';
 
 function GameMain(){
 
@@ -15,7 +16,11 @@ function GameMain(){
       <main>
         <div className="JokerSection"></div>
         <div className="ConsumableSection"></div>
-        <div className="StageSelect"></div> {/* Switch out with Round or Shop */}
+        <div className="center-section">
+          <StageSelect />
+        </div>
+        {/* <div className="StageSelect"></div>  */}
+        {/* Switch out with Round or Shop */}
         <div className="DeckSection"></div>
       </main>
     </div>

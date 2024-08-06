@@ -34,7 +34,7 @@ main .ConsumableSection {
   grid-column: 16 / -1;
 }
 
-main .StageSelect {
+main .center-section {
   background-color: #2b2929;
   grid-row: 6 / -1;
   grid-column: 1 / 20;

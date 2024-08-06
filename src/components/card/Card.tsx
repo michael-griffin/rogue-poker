@@ -1,5 +1,5 @@
 import "./Card.css";
-import {useState} from 'react';
+// import {useState} from 'react';
 import { useSortable } from "@dnd-kit/sortable";
 import {CSS} from "@dnd-kit/utilities";
 import { CardComponent } from "../../types/misc-types";
@@ -17,8 +17,6 @@ function Card({card, toggleSelected}: CardComponentProps){
   const {attributes, listeners, setNodeRef,
     transform, transition} = useSortable({id});
 
-  //const [selected, setSelected] = useState(false);
-
   const style = {
     transition,
     transform: CSS.Transform.toString(transform),
@@ -28,7 +26,6 @@ function Card({card, toggleSelected}: CardComponentProps){
   function handleClick(){
     toggleSelected(id);
     console.log('clicked card');
-    // setSelected(prev => !prev);
   }
   const selectedClass = selected ? 'selected' : '';
 

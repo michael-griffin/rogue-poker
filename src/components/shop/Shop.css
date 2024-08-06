@@ -1,0 +1,53 @@
+.shop-full {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.shop-top {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.shop-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.next-button {
+  background-color: #F9443B;
+}
+.reroll-button {
+  background-color: #2FB47D;
+}
+
+.shop-top-items {
+  background-color: #324C51;
+}
+
+
+
+.shop-vouchers {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.shop-vouchers .voucher {
+  position: relative;
+}
+/* .voucher-price {
+  position: absolute;
+} */
+.shop-packs {
+  background-color: #324C51;
+}
+.shop-packs .pack {
+  position: relative;
+}
+.pack-price,.voucher-price {
+  position: absolute;
+  height: 24px;
+  padding: 4px;
+  top: -24px;
+  left: 20px;
+}
