@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 import DnDmain from './dnd-demo/DnDmain'
-import GameMain from './components/Game/GameMain'
+import GameMain from './components/game/GameMain'
 
 function App() {
   const [count, setCount] = useState(0)
