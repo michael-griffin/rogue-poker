@@ -1,18 +1,64 @@
-.shop-full {
+/**
+TODO: simplify price CSS so classes match across items/packs/vouchers.
+finish voucher section.
+*/
+
+.shop-area {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  background-color: #39715A;
+  display: flex;
+  justify-content: center;
+  align-items: end;
+}
+.shop-menu-outer {
+  height: 92%;
+  width: 95%;
+  background-color: #324C51;
+  border-radius: 16px 16px 0px 0px;
+  border: 4px solid #CA4D4C;
+  border-bottom: none;
+  padding: 4px;
+}
+.shop-menu {
+  height: 96%;
+  width: 100%;
+  background-color: #172427;
+  filter: drop-shadow(0px 4px 0px #040E0F);
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 30px;
+  padding: 16px;
 }
 
-.shop-top {
+.menu-top {
+  height: 45%;
+  width: 100%;
   display: flex;
   justify-content: flex-end;
   gap: 10px;
 }
-.shop-buttons {
+.top-buttons {
+  height: 96%;
+  width: 26%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+}
+.next-button,.reroll-button {
+  height: 50%;
+  color: white;
+  font-size: 1.1rem;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  line-height: 100%;
+  gap: 8px;
 }
 .next-button {
   background-color: #F9443B;
@@ -20,29 +66,84 @@
 .reroll-button {
   background-color: #2FB47D;
 }
-
-.shop-top-items {
-  background-color: #324C51;
+.reroll-cost {
+  font-size: 1.5rem;
+  font-weight: 700;
 }
 
-
-
-.shop-vouchers {
+.top-items {
+  height: 100%;
+  width: 74%;
+  background-color: #324C51;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+.top-item {
+  position: relative;
+  height: 80%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
-.shop-vouchers .voucher {
+.top-item img {
+  max-height: 100%;
+}
+.item-price {
+  position: absolute;
+  height: 25%;
+  width: 40%;
+  background-color: black;
+  border-radius: 10px 10px 0px 0px;
+  border: 3px solid black;
+  top: -25%;
+  left: 25%;
+}
+.price-text {
+  color: white;
+  background-color: green;
+  border-radius: 10px;
+  font-size: 1.3rem;
+  line-height: 130%;
+}
+
+
+.menu-bottom {
+  height: 50%;
+  width: 96%;
+  display: flex;
+  gap: 10px;
+}
+
+.bottom-vouchers {
+  height: 100%;
+  width: 53%;
+  background-color: #202f32;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.bottom-vouchers .voucher {
   position: relative;
 }
 /* .voucher-price {
   position: absolute;
 } */
-.shop-packs {
+.bottom-packs {
+  height: 100%;
+  width: 45%;
   background-color: #324C51;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-.shop-packs .pack {
+.bottom-packs .pack {
   position: relative;
+  height: 80%;
 }
 .pack-price,.voucher-price {
   position: absolute;

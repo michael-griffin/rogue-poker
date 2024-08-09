@@ -119,7 +119,7 @@ column/sub elements*/
 }
 .bossblind-label {
   background-color: #357752;
-  outline-color: #44A96F;;
+  outline-color: #44A96F;
   filter: drop-shadow(0px 4px 0px #183725);
 }
 .defeated-label {
@@ -154,7 +154,7 @@ column/sub elements*/
 
 .blind-scorebox {
   width: 90%;
-  background-color: #1D2A2D;
+  background-color: #1d2a2d;
   border-radius: 10px;
   display: flex;
   flex-direction: column;

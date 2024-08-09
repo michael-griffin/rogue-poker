@@ -1,4 +1,4 @@
-
+import './Shop.css'
 
 function Shop(){
 
@@ -10,40 +10,48 @@ function Shop(){
   }
 
   return (
-    <div className="shop-full">
-      <div className="shop-top">
-        <div className="shop-buttons">
-          <div className="next-button">Next Round</div>
-          <div className="reroll-button">
-            <div>Reroll</div>
-            <div className="reroll-cost">{`$${calcReroll()}`}</div>
+    <div className='shop-area'>
+      <div className="shop-menu-outer">
+        <div className="shop-menu">
+          <div className="menu-top">
+           <div className="top-buttons">
+              <div className="next-button">
+                <div>Next</div>
+                <div>Round</div>
+              </div>
+              <div className="reroll-button">
+                <div>Reroll</div>
+                <div className="reroll-cost">{`$${calcReroll()}`}</div>
+              </div>
+            </div>
+            <div className="top-items">
+              <div className="item1 top-item">
+                <div className="item-price"><div className="price-text">$2</div></div>
+                <img className="item-img" src="/tarots/tarot-chariot.png" />
+              </div>
+              <div className="item2 top-item">
+              <div className="item-price"><div className="price-text">$2</div></div>
+                <img src="/tarots/tarot-chariot.png" />
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="shop-top-items">
-          <div className="item1">
-            <div className="item-price">$2</div>
-          </div>
-          <div className="item2">
-            <div className="item-price">$2</div>
-          </div>
-        </div>
 
-        <div className="shop-bottom">
-          <div className="shop-vouchers">
-            {/* <div className="voucher-label">ANTE 1 VOUCHER</div> */}
-            <div className="voucher1 voucher">
-              <div className="voucher-price">$7</div>
-              <img src="/vouchers/voucher-discard.png" />
+          <div className="menu-bottom">
+            <div className="bottom-vouchers">
+              {/* <div className="voucher1 voucher">
+                <div className="voucher-price">$7</div>
+                <img src="/vouchers/voucher-discard.png" />
+              </div> */}
             </div>
-          </div>
-          <div className="shop-packs">
-            <div className="pack1 pack">
-              <div className="pack-price">$3</div>
-              <img src="/tarots/tarot-chariot.png" />
-            </div>
-            <div className="pack2 pack">
-              <div className="pack-price">$4</div>
-              <img src="/tarots/tarot-death.png" />
+            <div className="bottom-packs">
+              <div className="pack1 pack">
+                <div className="pack-price">$3</div>
+                <img src="/boosters/tarot-pack-normal-v1.png" />
+              </div>
+              <div className="pack2 pack">
+                <div className="pack-price">$4</div>
+                <img src="/boosters/tarot-pack-normal-v2.png" />
+              </div>
             </div>
           </div>
         </div>
@@ -53,5 +61,5 @@ function Shop(){
 }
 
 
-
+{/* <div className="voucher-label">ANTE 1 VOUCHER</div> */}
 export default Shop;

@@ -18,8 +18,8 @@ function GameMain(){
         <div className="JokerSection"></div>
         <div className="ConsumableSection"></div>
         <div className="center-section">
-          <StageSelect />
-          {/* <Shop /> */}
+          {/* <StageSelect /> */}
+          <Shop />
         </div>
         {/* <div className="StageSelect"></div>  */}
         {/* Switch out with Round or Shop */}
