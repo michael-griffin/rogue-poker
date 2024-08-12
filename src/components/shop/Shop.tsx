@@ -24,13 +24,13 @@ function Shop(){
                 <div className="reroll-cost">{`$${calcReroll()}`}</div>
               </div>
             </div>
-            <div className="top-items">
-              <div className="item1 top-item">
-                <div className="item-price"><div className="price-text">$2</div></div>
+            <div className="top-sales">
+              <div className="item1 sales-item">
+                <div className="price-box"><div className="price-text">$2</div></div>
                 <img className="item-img" src="/tarots/tarot-chariot.png" />
               </div>
-              <div className="item2 top-item">
-              <div className="item-price"><div className="price-text">$2</div></div>
+              <div className="item2 sales-item">
+              <div className="price-box"><div className="price-text">$2</div></div>
                 <img src="/tarots/tarot-chariot.png" />
               </div>
             </div>
@@ -38,18 +38,19 @@ function Shop(){
 
           <div className="menu-bottom">
             <div className="bottom-vouchers">
-              {/* <div className="voucher1 voucher">
-                <div className="voucher-price">$7</div>
+              <div className="voucher1 sales-item">
+                <div className="price-box"><div className="price-text">$2</div></div>
                 <img src="/vouchers/voucher-discard.png" />
-              </div> */}
+              </div>
             </div>
-            <div className="bottom-packs">
-              <div className="pack1 pack">
-                <div className="pack-price">$3</div>
+
+            <div className="bottom-sales">
+              <div className="pack1 sales-item">
+              <div className="price-box"><div className="price-text">$2</div></div>
                 <img src="/boosters/tarot-pack-normal-v1.png" />
               </div>
-              <div className="pack2 pack">
-                <div className="pack-price">$4</div>
+              <div className="pack2 sales-item">
+              <div className="price-box"><div className="price-text">$2</div></div>
                 <img src="/boosters/tarot-pack-normal-v2.png" />
               </div>
             </div>

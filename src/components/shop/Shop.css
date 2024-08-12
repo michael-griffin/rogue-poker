@@ -1,13 +1,13 @@
 /**
-TODO: simplify price CSS so classes match across items/packs/vouchers.
-finish voucher section.
+TODO: CSS still not great as size changes. Price tags disconnect from images.
 */
+@import '../../style.css';
 
 .shop-area {
   position: relative;
   height: 100%;
   width: 100%;
-  background-color: #39715A;
+  background-color: var(--green-600);
   display: flex;
   justify-content: center;
   align-items: end;
@@ -15,16 +15,16 @@ finish voucher section.
 .shop-menu-outer {
   height: 92%;
   width: 95%;
-  background-color: #324C51;
+  background-color: var(--turquoise-500);
   border-radius: 16px 16px 0px 0px;
-  border: 4px solid #CA4D4C;
+  border: 4px solid rgb(202, 77, 76);
   border-bottom: none;
   padding: 4px;
 }
 .shop-menu {
   height: 96%;
   width: 100%;
-  background-color: #172427;
+  background-color: var(--turquoise-800);
   filter: drop-shadow(0px 4px 0px #040E0F);
   border-radius: 10px;
   display: flex;
@@ -50,7 +50,7 @@ finish voucher section.
 }
 .next-button,.reroll-button {
   height: 50%;
-  color: white;
+  color: var(--white-100);
   font-size: 1.1rem;
   border-radius: 5px;
   display: flex;
@@ -61,54 +61,56 @@ finish voucher section.
   gap: 8px;
 }
 .next-button {
-  background-color: #F9443B;
+  background-color: var(--red-500);
 }
 .reroll-button {
-  background-color: #2FB47D;
+  background-color: var(--green-300);
 }
 .reroll-cost {
   font-size: 1.5rem;
   font-weight: 700;
 }
 
-.top-items {
+.top-sales {
   height: 100%;
   width: 74%;
-  background-color: #324C51;
+  background-color: var(--turquoise-400);
   border-radius: 10px;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 20px;
 }
-.top-item {
+.sales-item {
   position: relative;
   height: 80%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
-.top-item img {
+.sales-item img {
+  max-width: 100%;
   max-height: 100%;
+  z-index: 10; /*images have transparent edges, so want the price tags behind them*/
 }
-.item-price {
+.price-box {
   position: absolute;
-  height: 25%;
+  height: 30%;
   width: 40%;
-  background-color: black;
+  background-color: var(--black-800);
   border-radius: 10px 10px 0px 0px;
-  border: 3px solid black;
-  top: -25%;
+  border: 3px solid var(--black-800);
+  top: max(-23%, -40px);
   left: 25%;
 }
 .price-text {
-  color: white;
-  background-color: green;
+  color: var(--peach-400);
+  background-color: var(--grey-500);
   border-radius: 10px;
   font-size: 1.3rem;
+  font-weight: 700;
   line-height: 130%;
 }
-
 
 .menu-bottom {
   height: 50%;
@@ -120,35 +122,33 @@ finish voucher section.
 .bottom-vouchers {
   height: 100%;
   width: 53%;
-  background-color: #202f32;
-  border-radius: 10px;
+  background-color: var(--turquoise-700);
+  border: 8px solid var(--turquoise-400);
+  border-radius: 16px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
+
 .bottom-vouchers .voucher {
   position: relative;
 }
 /* .voucher-price {
   position: absolute;
 } */
-.bottom-packs {
+.bottom-sales {
   height: 100%;
   width: 45%;
-  background-color: #324C51;
-  border-radius: 10px;
+  background-color: var(--turquoise-400);
+  border-radius: 16px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
-.bottom-packs .pack {
+.sales-pack {
   position: relative;
   height: 80%;
-}
-.pack-price,.voucher-price {
-  position: absolute;
-  height: 24px;
-  padding: 4px;
-  top: -24px;
-  left: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
