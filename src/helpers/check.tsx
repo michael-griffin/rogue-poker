@@ -1,6 +1,7 @@
 //https://balatrogame.fandom.com/wiki/Card_Modifiers
 
-import {Card, Joker} from '../types/misc-types'
+import {RankNum, Suits, Card, Joker} from '../types/misc'
+import {getRankInfo} from './misc';
 
 /**
  * Basic structure:
@@ -39,7 +40,7 @@ type CheckStraightFn = (hand: Card[], jokers: Joker[]) =>
  * @param hand
  * @param jokers
  */
-function checkStraight(hand: Card[], jokers: Joker[] = []) {
+export function checkStraight(hand: Card[], jokers: Joker[] = []) {
   let gap = 1;
   let minSize = 5;
   //If joker, gap = 2, and/or minSize = 4.
@@ -93,9 +94,10 @@ type CheckFlushFn = (hand: Card[], jokers: Joker[]) =>
 
 
 
-function checkFlush(hand: Card[], jokers: Joker[] = []){
+export function checkFlush(hand: Card[], jokers: Joker[] = []){
   let minSize = 5;
   let isFlush = false;
+  let scoredCards: Card[] = [];
   //if Joker, minSize = 4.
 
   //loop through hand. keep running count of each suit
@@ -104,26 +106,56 @@ function checkFlush(hand: Card[], jokers: Joker[] = []){
   //(??) if flush, loop through hand, add suit matches to scored cards (and stones)
 
   let suitCounts = {
+    spades: 0,
+    hearts: 0,
     clubs: 0,
     diamonds: 0,
-    hearts: 0,
-    spades: 0
   }
+  type SuitKey = "clubs" | "diamonds" | "hearts" | "spades"
 
   for (let card of hand){
-    if (card.type !== "stone"){
+    if (card.enhanced === "wild"){
+      for (let key in suitCounts) {
+        suitCounts[key as SuitKey] += 1;
+      }
+    } else if (card.enhanced !== "stone"){
       suitCounts[card.suit] += 1;
     }
   }
 
-  type SuitKey = "clubs" | "diamonds" | "hearts" | "spades"
   for (let key in suitCounts){
-    if (suitCounts[key as SuitKey] > minSize){
+    if (suitCounts[key as SuitKey] >= minSize){
       isFlush = true;
     }
   }
 
+  //populate scoredCards.
+  //find largest match, working way down to min size.
+  //loop through suitCounts, if count matches handSize
 
+  //score the largest hand with a flush
+  for (let scoredSize = hand.length; scoredSize >= minSize; scoredSize--){
+    for (let key in suitCounts){
+      if (suitCounts[key as SuitKey] === scoredSize){
+        for (let currentCard of hand){
+          if (currentCard.suit === key) scoredCards.push(currentCard);
+        }
+        isFlush = true;
+        //return first matching flush
+        return {
+          scoredCards,
+          isFlush
+        }
+      }
+    }
+  }
+
+
+  //if this is reached, scoredCards is empty, isFlush=false
+  return {
+    scoredCards,
+    isFlush
+  }
 }
 //FIXME: check if checkFlush satisfies CheckFlushFn
 
