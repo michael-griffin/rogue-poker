@@ -8,22 +8,23 @@
 import './GameMain.css'
 import StageSelect from '../stage/StageSelect';
 import Shop from '../shop/Shop';
+import SideMenu from '../side-menu/SideMenu';
 
 function GameMain(){
 
   return (
     <div className="fullbody">
-      <div className="SideMenu"></div>
+      <SideMenu />
       <main>
-        <div className="JokerSection"></div>
-        <div className="ConsumableSection"></div>
+        <div className="joker-section"></div>
+        <div className="consumable-section"></div>
         <div className="center-section">
           {/* <StageSelect /> */}
           <Shop />
         </div>
         {/* <div className="StageSelect"></div>  */}
         {/* Switch out with Round or Shop */}
-        <div className="DeckSection"></div>
+        <div className="deck-section"></div>
       </main>
     </div>
   )
