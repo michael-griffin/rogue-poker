@@ -17,6 +17,43 @@ import {getRankInfo} from './misc';
  *
 */
 
+/* Hand collection data structure
+
+{
+  bestHand: 'flush',
+  highScore: 600,
+  handTypes: [flush, threeOf, pair],
+  hands {
+    royalFlush: undefined,
+    straightFlush: undefined,
+    straight: undefined,
+    flush: [Card1, Card2, ...],
+    fiveOf: undefined,
+    fourOf: undefined,
+    threeOf: [Card1, Card2, ...],
+    pair: [Card1, Card2],
+    twoPair: undefined,
+    fullHouse: undefined,
+  }
+}
+  Other ideas: scored cards could be array of booleans
+  [true, false, true, false, false] could be a pair for example.
+*/
+
+/**
+ * Builds the handInfo object above by calling each checkHand function
+ */
+function checkAllHands(){
+  //checkFlush
+  //update handInfo
+
+  //checkStraight + update
+
+  //CheckPairs (and helper calls?)
+
+}
+
+
 type CheckHandfn = (hand: Card[]) => {scoredCards: Card[], handType: string}
 function checkHand(hand: Card[]): {scoredCards: Card[], handType: string} {
   return {
@@ -27,6 +64,38 @@ function checkHand(hand: Card[]): {scoredCards: Card[], handType: string} {
 checkHand satisfies CheckHandfn
 
 
+/*Check pairs may need to return a 'hands' bigger object,
+then can combine after using myObj[hands] = {...myObj[hands], ...returnedHands}
+*/
+function checkPairs(hand: Card[]): {scoredCards: Card[], handType: string} {
+  /*grab all ranks seen,
+  for each rank, go through scoredCards and get count of ranks
+  then find highest count.
+
+  */
+  let handTypes = ['fiveOf', 'fourOf', 'threeOf', 'pair'] //twoPair, fullHouse added.
+  const rankCounts: Record<string, number> = {};
+  for (let {rank} of hand){
+    rankCounts[rank] = rankCounts[rank] + 1 || 1;
+  }
+
+  const highCount = Math.max(...Object.values(rankCounts));
+  let handName = '';
+  if (highCount === 5){
+
+  } else if (highCount === 4){
+
+  }
+  let ind = handTypes.indexOf(handName);
+  handTypes = handTypes.slice(ind);
+  //handle fullHouse + twoPair
+
+
+  return {
+    scoredCards: hand,
+    handType: 'pair'
+  }
+}
 
 type CheckStraightFn = (hand: Card[], jokers: Joker[]) =>
   {scoredCards: Card[], isStraight: boolean } | null;
