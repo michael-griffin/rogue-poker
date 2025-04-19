@@ -1,6 +1,13 @@
 //https://balatrogame.fandom.com/wiki/Card_Modifiers
 
-import {RankNum, Suits, Card, Joker} from '../types/misc'
+import {
+  RankNum,
+  Suits,
+  Card,
+  Joker,
+  HandTypes,
+  HandInfo,
+} from '../types/misc'
 import {getRankInfo} from './misc';
 
 /**
@@ -19,38 +26,32 @@ import {getRankInfo} from './misc';
 
 /* Hand collection data structure
 
-{
-  bestHand: 'flush',
-  highScore: 600,
-  handTypes: [flush, threeOf, pair],
-  hands {
-    royalFlush: undefined,
-    straightFlush: undefined,
-    straight: undefined,
-    flush: [Card1, Card2, ...],
-    fiveOf: undefined,
-    fourOf: undefined,
-    threeOf: [Card1, Card2, ...],
-    pair: [Card1, Card2],
-    twoPair: undefined,
-    fullHouse: undefined,
-  }
-}
-  Other ideas: scored cards could be array of booleans
-  [true, false, true, false, false] could be a pair for example.
-*/
-
 /**
  * Builds the handInfo object above by calling each checkHand function
+ *
  */
-function checkAllHands(){
+function checkAllHands(currentHand: Card[]){
   //checkFlush
   //update handInfo
-
   //checkStraight + update
 
   //CheckPairs (and helper calls?)
+  const handInfo: HandInfo = {
+    bestHand: 'highCard',
+    highScore: 0,
+    handTypes: [],
+    scoringHands: {},
+  };
 
+  let checkFunctions = [checkPair, checkFlush, checkStraight];
+  for (let checkFunction of checkFunctions){
+    const {match, handType, scoringHand} = checkFunction(currentHand);
+    if (match){
+      //update handInfo
+    }
+  }
+
+  return handInfo;
 }
 
 

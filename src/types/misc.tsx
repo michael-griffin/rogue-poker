@@ -25,3 +25,35 @@ export type Joker = {
   price: number,
   sellValue: number
 }
+
+/*
+{
+  bestHand: 'flush',
+  highScore: 600,
+  handTypes: [flush, threeOf, pair],
+  hands {
+    royalFlush: undefined,
+    straightFlush: undefined,
+    straight: undefined,
+    flush: [Card1, Card2, ...],
+    fiveOf: undefined,
+    fourOf: undefined,
+    threeOf: [Card1, Card2, ...],
+    pair: [Card1, Card2],
+    twoPair: undefined,
+    fullHouse: undefined,
+  }
+}
+*/
+export type HandTypes = 'highCard' | 'pair' | 'threeOf' | 'fourOf' |
+  'fiveOf' | 'twoPair' | 'fullHouse' |
+  'flush' | 'straight' | 'straightFlush' | 'royalFlush';
+
+//FIXME: string is less specific, but using HandTypes or [key in HandTypes]: Card[]
+//has TS expect ALL of the provided handtypes
+export type HandInfo = {
+  bestHand: HandTypes,
+  highScore: number,
+  handTypes: HandTypes[]
+  scoringHands: Record<string, Card[]>;
+}
