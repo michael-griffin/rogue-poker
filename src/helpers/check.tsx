@@ -2,7 +2,7 @@
 
 import {
   RankNum,
-  Suits,
+  Suit,
   Card,
   Joker,
   HandTypes,
@@ -42,7 +42,7 @@ function checkAllHands(currentHand: Card[]){
     handTypes: [],
     scoringHands: {},
   };
-
+  /*
   let checkFunctions = [checkPair, checkFlush, checkStraight];
   for (let checkFunction of checkFunctions){
     const {match, handType, scoringHand} = checkFunction(currentHand);
@@ -50,7 +50,7 @@ function checkAllHands(currentHand: Card[]){
       //update handInfo
     }
   }
-
+  */
   return handInfo;
 }
 
@@ -71,41 +71,39 @@ function checkHand(hand: Card[]): CheckResult {
 }
 checkHand satisfies CheckHandfn
 
-function checkPair(hand: Card[]){
+
+export function checkHighCard(hand: Card[]){
   let result: CheckResult;
-  let match: boolean = false;
-  const handType: HandTypes = 'pair';
+  let match: boolean = true; //highCard is always true.
+  const handType: HandTypes = 'highCard';
   const scoringHand: Card[] = [];
 
-  const rankCounts: Record<string, number> = {};
-  for (let {rank} of hand){
-    rankCounts[rank] = rankCounts[rank] + 1 || 1;
-  }
+  let ranks = hand.map(card => {
+    let {rank} = card;
+    return rank;
+  });
+  let highRank = Math.max(...ranks);
 
-
-  let relevantRanks = [];
-  for (let rank in rankCounts){
-    if (rankCounts[rank] >= 2){
-      match = true;
-      relevantRanks.push(+rank);
+  let highCard:Card = hand[0];
+  for (let card of hand){
+    if (card.rank === highRank) highCard = card;
+    if (card.name === 'ace') {
+      highCard = card;
       break;
     }
   }
-
-  if (!match) return { match, handType, scoringHand}
-
-  for (let card of hand){
-    if (relevantRanks.includes(card['rank'])){
-      scoringHand.push(card);
-    }
-    if (scoringHand.length === 2) break;
-  }
+  scoringHand.push(highCard);
 
   result = {match, handType, scoringHand};
   return result;
 }
 
-function checkPairToFive(hand: Card[], count: 2|3|4|5){
+/** Checks whether a pair or higher is present in hand.
+ *
+ * Note: this is INCLUSIVE, a four of a kind still contains a pair.
+ * Done for jokers, which can check whether a pair is present.
+ */
+export function checkPairToFive(hand: Card[], count: 2|3|4|5): CheckResult {
   const possTypes = {
     2: 'pair',
     3: 'threeOf',
@@ -146,6 +144,27 @@ function checkPairToFive(hand: Card[], count: 2|3|4|5){
   return result;
 }
 
+/** Checks for the presence of two distinct pairs.
+ *
+ */
+export function checkTwoPair(hand: Card[]){
+  let result: CheckResult;
+  let match: boolean = false;
+  let handType: HandTypes;
+  const scoringHand: Card[] = [];
+
+  const rankCounts: Record<string, number> = {};
+  for (let {rank} of hand){
+    rankCounts[rank] = rankCounts[rank] + 1 || 1;
+  }
+
+  //could do a slightly odd method: delete any keys with counts = 1.
+  //if there are two left, then we have a match.
+  //can finally look at scoringHand length, if === 5, then fullHouse, if 4, twoPair
+}
+
+
+
 /*Check pairs may need to return a 'hands' bigger object,
 then can combine after using myObj[hands] = {...myObj[hands], ...returnedHands}
 */
@@ -178,6 +197,42 @@ function checkPairs(hand: Card[]): {scoredCards: Card[], handType: string} {
     handType: 'pair'
   }
 }
+
+
+function checkPair(hand: Card[]){
+  let result: CheckResult;
+  let match: boolean = false;
+  const handType: HandTypes = 'pair';
+  const scoringHand: Card[] = [];
+
+  const rankCounts: Record<string, number> = {};
+  for (let {rank} of hand){
+    rankCounts[rank] = rankCounts[rank] + 1 || 1;
+  }
+
+
+  let relevantRanks = [];
+  for (let rank in rankCounts){
+    if (rankCounts[rank] >= 2){
+      match = true;
+      relevantRanks.push(+rank);
+      break;
+    }
+  }
+
+  if (!match) return { match, handType, scoringHand}
+
+  for (let card of hand){
+    if (relevantRanks.includes(card['rank'])){
+      scoringHand.push(card);
+    }
+    if (scoringHand.length === 2) break;
+  }
+
+  result = {match, handType, scoringHand};
+  return result;
+}
+
 
 type CheckStraightFn = (hand: Card[], jokers: Joker[]) =>
   {scoredCards: Card[], isStraight: boolean } | null;
@@ -221,7 +276,7 @@ export function checkStraight(hand: Card[], jokers: Joker[] = []) {
     let rankDiff = Math.abs(nextCard.rank - currCard.rank);
     //If the first card is a low rank, check wrap-around Ace as well.
     if (i === 0 && (currCard.rank - gap) <= 1){
-      if (sortedHand[sortedHand.length - 1].type === 'ace'){
+      if (sortedHand[sortedHand.length - 1].name === 'ace'){
         sequenceLength++;
         maxSequence = Math.max(sequenceLength, maxSequence);
       }
@@ -236,6 +291,12 @@ export function checkStraight(hand: Card[], jokers: Joker[] = []) {
   }
 
   //if passed maxSequence, return {isStraight + scoredCards}
+  //FIXME: update return
+  return {
+    match: true,
+    handType: 'pair',
+    scoringHand: hand
+  }
 }
 //FIXME: check if checkStraight satisfies CheckStraightFn
 
@@ -298,6 +359,13 @@ export function checkFlush(hand: Card[], jokers: Joker[] = []){
           isFlush
         }
       }
+    }
+
+    //FIXME: update return
+    return {
+      match: true,
+      handType: 'pair',
+      scoringHand: hand
     }
   }
 

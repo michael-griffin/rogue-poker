@@ -110,7 +110,7 @@ export function buildSimpleDeck(): Card[]{
 }
 
 
-export function findCards(searchType:'suit'|'rank', match:string, deck:Card[]){
+export function findCards(searchType:'suit'|'rank', match:Suit|RankNum, deck:Card[]){
   let foundCards: Card[] = [];
   if (searchType === 'suit'){
     foundCards = deck.filter(card => {
@@ -118,7 +118,7 @@ export function findCards(searchType:'suit'|'rank', match:string, deck:Card[]){
     });
   } else if (searchType === 'rank'){
     foundCards = deck.filter(card => {
-      if (card.rank === +match) return true;
+      if (card.rank === match) return true;
     });
   }
   return foundCards;
