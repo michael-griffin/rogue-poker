@@ -50,7 +50,7 @@ export type Joker = {
 }
 */
 export type HandTypes = 'highCard' | 'pair' | 'threeOf' | 'fourOf' |
-  'fiveOf' | 'twoPair' | 'fullHouse' |
+  'fiveOf' | 'flushFive' | 'twoPair' | 'fullHouse' | 'flushHouse' |
   'flush' | 'straight' | 'straightFlush' | 'royalFlush';
 
 //FIXME: string is less specific, but using HandTypes or [key in HandTypes]: Card[]

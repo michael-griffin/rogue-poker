@@ -150,7 +150,7 @@ export function checkPairToFive(hand: Card[], count: 2|3|4|5): CheckResult {
 export function checkTwoPair(hand: Card[]){
   let result: CheckResult;
   let match: boolean = false;
-  let handType: HandTypes;
+  let handType: HandTypes = 'twoPair'; //can update to fullHouse/flushHouse
   const scoringHand: Card[] = [];
 
   const rankCounts: Record<string, number> = {};
@@ -158,9 +158,30 @@ export function checkTwoPair(hand: Card[]){
     rankCounts[rank] = rankCounts[rank] + 1 || 1;
   }
 
-  //could do a slightly odd method: delete any keys with counts = 1.
-  //if there are two left, then we have a match.
-  //can finally look at scoringHand length, if === 5, then fullHouse, if 4, twoPair
+  //filter rankCounts to pair or more.
+  //if rankCounts length == 2, continue.
+  //add cards that have matching ranks
+  //if scoringHand.length === 5 then fullHouse
+
+  let relCounts = Object.entries(rankCounts).filter(([_, val]) => val >= 2);
+  let relRanks = relCounts.map(([key, _]) => +key);
+
+  if (relRanks.length < 2) return {match, handType: 'twoPair', scoringHand};
+
+  match = true;
+  for (let card of hand){
+    if (relRanks.includes(card.rank)) scoringHand.push(card);
+  }
+
+  if (scoringHand.length === 4){
+    handType = 'twoPair';
+  } else if (scoringHand.length === 5){
+    let flushResult = checkFlush(scoringHand);
+    if (flushResult.match) handType = 'flushHouse';
+    else handType = 'fullHouse';
+  }
+
+  return {match, handType, scoringHand};
 }
 
 
