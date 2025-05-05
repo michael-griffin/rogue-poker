@@ -14,6 +14,7 @@ export type Card = {
   rank: RankNum,
   name: RankName,
   cardType: CardType,
+  chip: number,
   enhanced: Enhancement | null,
   special: SpecialCardMod | null,
   seal: Seal | null,
@@ -27,7 +28,9 @@ export type Joker = {
   special: SpecialJokerMod | null, //holo, foil, poly
   negative: boolean,
   price: number,
-  sellValue: number
+  sellValue: number,
+  activePhase: string,
+  description: string
 }
 
 /*
@@ -61,3 +64,26 @@ export type HandInfo = {
   handTypes: HandTypes[]
   scoringHands: Record<string, Card[]>;
 }
+
+type RunInfo = {
+  deck: Card[],
+  vouchers: VoucherTypes[],
+  handTypesInfo: {},
+
+  currentRound: number,
+  currentAnte: number,
+  currentMoney: number,
+
+  handsLeft: number,
+  discardsLeft: number,
+  handSize: number,
+
+  scoreForRound: number,
+  chipSoFar: number,
+  multSoFar: number,
+}
+
+type VoucherTypes = 'blank' | 'bossReroll' | 'clearance' | 'consumable' |
+  'discardsLeft' | 'handsLeft' | 'handSize' | 'hieroglyph' | 'overstock' |
+  'planet' | 'reroll' | 'seedMoney' | 'shopCards' | 'specialCards' |
+  'tarot' | 'telescope';

@@ -16,12 +16,30 @@ export const rankNames = {
   13: 'king'
 };
 
+export const chipValues = {
+  1: 11,
+  2: 2,
+  3: 3,
+  4: 4,
+  5: 5,
+  6: 6,
+  7: 7,
+  8: 8,
+  9: 9,
+  10: 10,
+  11: 10,
+  12: 10,
+  13: 10
+}
+
 //type RankNum = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
 type RankInfo = {
   rank: RankNum,
   name: string,
+  chip: number,
   cardType: CardType,
 }
+
 export function getRankInfo(rank: RankNum): RankInfo {
   let cardType: CardType;
   if (rank === 1){
@@ -35,6 +53,7 @@ export function getRankInfo(rank: RankNum): RankInfo {
   let rankInfo = {
     rank: rank,
     name: rankNames[rank],
+    chip: chipValues[rank],
     cardType: cardType,
   }
   return rankInfo;
@@ -44,6 +63,7 @@ export function getRankInfo(rank: RankNum): RankInfo {
 export function makeCard(rank: RankNum, suit:Suit): Card {
   const rankInfo = getRankInfo(rank);
   const name = rankInfo['name'] as RankName;
+  const chip = rankInfo['chip'] as number;
   const cardType = rankInfo['cardType'] as CardType;
 
   const card = {
@@ -51,6 +71,7 @@ export function makeCard(rank: RankNum, suit:Suit): Card {
     rank,
     name,
     cardType,
+    chip,
     enhanced: null,
     special: null,
     seal: null,
