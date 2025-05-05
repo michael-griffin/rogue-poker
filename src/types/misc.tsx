@@ -58,15 +58,52 @@ export type HandTypes = 'highCard' | 'pair' | 'threeOf' | 'fourOf' |
 
 //FIXME: string is less specific, but using HandTypes or [key in HandTypes]: Card[]
 //has TS expect ALL of the provided handtypes
-export type HandInfo = {
+export type HandStatus = {
+  hand: Card[],
   bestHand: HandTypes,
   highScore: number,
   handTypes: HandTypes[]
-  scoringHands: Record<string, Card[]>;
+  scoredCards: Record<string, boolean[]>;
 }
 
+type DeckStatus = {
+  deck: Card[],
+  dealtCards: Card[], //handSize active cards, can be played or discarded.
+  selectedCards: Card[],
+  playedCards: Card[],
+  unplayedCards: Card[],
+  usedCards: Card[], //discarded or played
+  remainingCards: Card[], //deck remaining
+}
+
+type RunStatus = {
+  vouchers: VoucherTypes[],
+  handTypesInfo: {},
+  currentRound: number,
+  currentAnte: number,
+  currentMoney: number,
+}
+
+type RoundStatus = {
+  handsLeft: number,
+  discardsLeft: number,
+  handSize: number,
+
+  scoreForRound: number,
+  chipSoFar: number,
+  multSoFar: number,
+}
+
+/*
 type RunInfo = {
   deck: Card[],
+  dealtCards: Card[], //handSize active cards, can be played or discarded.
+  selectedCards: Card[],
+  playedCards: Card[],
+  unplayedCards: Card[],
+  usedCards: Card[], //discarded or played
+  remainingCards: Card[], //deck remaining
+
   vouchers: VoucherTypes[],
   handTypesInfo: {},
 
@@ -82,6 +119,7 @@ type RunInfo = {
   chipSoFar: number,
   multSoFar: number,
 }
+*/
 
 type VoucherTypes = 'blank' | 'bossReroll' | 'clearance' | 'consumable' |
   'discardsLeft' | 'handsLeft' | 'handSize' | 'hieroglyph' | 'overstock' |
