@@ -66,7 +66,7 @@ export type HandStatus = {
   scoredCards: Record<string, boolean[]>;
 }
 
-type DeckStatus = {
+export type DeckStatus = {
   deck: Card[],
   dealtCards: Card[], //handSize active cards, can be played or discarded.
   selectedCards: Card[],

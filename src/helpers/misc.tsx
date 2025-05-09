@@ -1,4 +1,15 @@
-import {RankNum, CardType, Suit, Card, Joker, RankName, Enhancement, SpecialCardMod, Seal} from '../types/misc'
+import {
+  RankNum,
+  CardType,
+  Suit,
+  Card,
+  Joker,
+  RankName,
+  Enhancement,
+  SpecialCardMod,
+  Seal,
+  DeckStatus
+} from '../types/misc'
 
 export const rankNames = {
   1: 'ace',
@@ -101,6 +112,80 @@ export function enhanceCard(card: Card, enhanced=null as Enhancement | null,
 }
 
 
+export function makeDeckStatus(deck: Card[]): DeckStatus {
+  const deckStatusTemplate = {
+    deck: structuredClone(deck), //when moving to react, need to avoid mutating.
+    dealtCards: [], //handSize active cards, can be played or discarded.
+    selectedCards: [],
+    playedCards: [],
+    unplayedCards: [],
+    usedCards: [], //discarded or played
+    remainingCards: structuredClone(deck), //deck remaining
+  }
+
+  return deckStatusTemplate;
+}
+function resetDeckStatus(deckStatus:DeckStatus): DeckStatus {
+  let newStatus = structuredClone(deckStatus);
+  newStatus = {
+    deck: newStatus['deck'],
+    dealtCards: [],
+    selectedCards: [],
+    playedCards: [],
+    unplayedCards: [],
+    usedCards: [],
+    remainingCards: newStatus['deck'],
+  }
+  return newStatus;
+}
+
+function dealCards(deckStatus:DeckStatus, numCards: number): DeckStatus {
+  const newStatus = structuredClone(deckStatus);
+
+  //JS handles case of too little remaining automatically:
+  //slice will return a smaller/empty array if insufficient cards to deal.
+  const newlyDealt = newStatus.remainingCards.slice(0, numCards);
+  const newRemaining = newStatus.remainingCards.slice(numCards);
+
+  newStatus['dealtCards'] = [...newStatus['dealtCards'], ...newlyDealt];
+  newStatus['remainingCards'] = newRemaining;
+  return newStatus;
+}
+
+/** Move selectedCards to playedCards
+ * copy unselected cards to unplayedCards
+ * remove playedCards from dealtCards
+ * @param deckStatus
+ */
+function playCards(deckStatus:DeckStatus, numCards: number): DeckStatus {
+  const newStatus = structuredClone(deckStatus);
+
+  return newStatus;
+}
+
+/** move playedCards to usedCards
+ *
+ */
+function postPlayCleanup(deckStatus:DeckStatus, numCards: number): DeckStatus {
+  const newStatus = structuredClone(deckStatus);
+
+  return newStatus;
+}
+
+/** move selectedCards to usedCards
+ * deal selectedCard.length new cards from remaining
+ */
+function discardCards(deckStatus: DeckStatus): DeckStatus {
+  const newStatus = structuredClone(deckStatus);
+  newStatus['usedCards'] = [...newStatus['selectedCards'], ...newStatus['usedCards']];
+
+  let nToDeal = newStatus['selectedCards'].length;
+  newStatus['selectedCards'] = [];
+  let dealtNew = dealCards(newStatus, nToDeal);
+  return dealtNew;
+}
+
+
 export function buildStartDeck(): Card[] {
   const ranks = Array(13).fill(0).map((_, ind) => ind+1) as RankNum[];
   const suits: Suit[] = ['hearts', 'diamonds', 'spades', 'clubs'];
@@ -144,3 +229,5 @@ export function findCards(searchType:'suit'|'rank', match:Suit|RankNum, deck:Car
   }
   return foundCards;
 }
+
+//TODO: templates for the various status types.
