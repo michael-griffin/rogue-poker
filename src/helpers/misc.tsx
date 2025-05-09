@@ -101,8 +101,12 @@ type EnhanceCardParams = {
   seal: Seal | null,
 }
 */
-export function enhanceCard(card: Card, enhanced=null as Enhancement | null,
-  special=null as SpecialCardMod | null, seal=null as Seal | null): Card {
+export function enhanceCard(
+  card: Card,
+  enhanced=null as Enhancement | null,
+  special=null as SpecialCardMod | null,
+  seal=null as Seal | null
+): Card {
 
   if (enhanced !== null) card['enhanced'] = enhanced;
   if (special !== null) card['special'] = special;
@@ -125,22 +129,16 @@ export function makeDeckStatus(deck: Card[]): DeckStatus {
 
   return deckStatusTemplate;
 }
-function resetDeckStatus(deckStatus:DeckStatus): DeckStatus {
-  let newStatus = structuredClone(deckStatus);
-  newStatus = {
-    deck: newStatus['deck'],
-    dealtCards: [],
-    selectedCards: [],
-    playedCards: [],
-    unplayedCards: [],
-    usedCards: [],
-    remainingCards: newStatus['deck'],
-  }
-  return newStatus;
-}
 
+
+/** Deals numCards from remainingCards, and adds to dealtCards
+ *  unselects all cards after new hand is dealt
+ *
+ *  Note: if there are too few cards remaining, will deal only the remaining,
+ *  resulting in a smaller hand.
+ */
 function dealCards(deckStatus:DeckStatus, numCards: number): DeckStatus {
-  const newStatus = structuredClone(deckStatus);
+  let newStatus = structuredClone(deckStatus);
 
   //JS handles case of too little remaining automatically:
   //slice will return a smaller/empty array if insufficient cards to deal.
@@ -149,40 +147,59 @@ function dealCards(deckStatus:DeckStatus, numCards: number): DeckStatus {
 
   newStatus['dealtCards'] = [...newStatus['dealtCards'], ...newlyDealt];
   newStatus['remainingCards'] = newRemaining;
+  newStatus = unselectAllCards(newStatus);
   return newStatus;
 }
 
-/** Move selectedCards to playedCards
- * copy unselected cards to unplayedCards
- * remove playedCards from dealtCards
- * @param deckStatus
- */
-function playCards(deckStatus:DeckStatus, numCards: number): DeckStatus {
+function unselectAllCards(deckStatus:DeckStatus): DeckStatus {
   const newStatus = structuredClone(deckStatus);
-
+  newStatus['selectedCards'] = Array(newStatus['dealtCards'].length).fill(false);
   return newStatus;
 }
 
-/** move playedCards to usedCards
- *
- */
-function postPlayCleanup(deckStatus:DeckStatus, numCards: number): DeckStatus {
-  const newStatus = structuredClone(deckStatus);
-
-  return newStatus;
-}
 
 /** move selectedCards to usedCards
  * deal selectedCard.length new cards from remaining
  */
+
 function discardCards(deckStatus: DeckStatus): DeckStatus {
   const newStatus = structuredClone(deckStatus);
-  newStatus['usedCards'] = [...newStatus['selectedCards'], ...newStatus['usedCards']];
+  const {dealtCards, selectedCards} = deckStatus;
+  const discarded = dealtCards.filter((_, ind) => selectedCards[ind]);
+  const leftover = dealtCards.filter((_, ind) => !selectedCards[ind]);
+  newStatus['usedCards'] = [...discarded, ...newStatus['usedCards']];
+  newStatus['dealtCards'] = leftover;
 
-  let nToDeal = newStatus['selectedCards'].length;
-  newStatus['selectedCards'] = [];
-  let dealtNew = dealCards(newStatus, nToDeal);
-  return dealtNew;
+  let nToDeal = discarded.length;
+  let refilled = dealCards(newStatus, nToDeal); //also unselects
+  return refilled;
+}
+
+
+/** Moves selectedCards to playedCards, copies unselected to unplayedCards,
+ *  and removes playedCards from dealtCards
+ */
+function playCards(deckStatus:DeckStatus): DeckStatus {
+  const newStatus = structuredClone(deckStatus);
+  const {dealtCards, selectedCards} = deckStatus;
+  const playedCards = dealtCards.filter((_, ind) => selectedCards[ind]);
+  const unplayedCards = dealtCards.filter((_, ind) => !selectedCards[ind]);
+
+  newStatus.playedCards = playedCards;
+  newStatus.unplayedCards = unplayedCards;
+  newStatus.dealtCards = unplayedCards;
+
+  return newStatus;
+}
+
+
+/** move playedCards to usedCards,
+ *  refills hand
+ */
+function postPlayCleanup(deckStatus:DeckStatus): DeckStatus {
+  const newStatus = structuredClone(deckStatus);
+
+  return newStatus;
 }
 
 
