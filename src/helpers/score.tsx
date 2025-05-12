@@ -6,6 +6,17 @@ https://balatrogame.fandom.com/wiki/Planet_Cards
 */
 
 import { allJokerFunctions } from "./jokers";
+import { Joker, Card} from "../types/misc";
+
+/*base scoring goals for each ante, starting at Ante 0
+* small blinds are x1, big x1.5, boss x2
+* green stake or higher leads to hard scaling, purpl to hell
+*/
+export const scoreGoals = {
+  normal: [100, 300, 800, 2000, 5000, 11000, 20000, 35000, 50000],
+  hard: [100, 300, 900, 2600, 8000, 20000, 36000, 60000, 100000],
+  hell: [100, 300, 1000, 3200, 9000, 25000, 60000, 110000, 200000],
+}
 
 const baseScores = {
   'highCard':       {'chip': 5,   'mult': 1},
@@ -46,7 +57,7 @@ function playHand(){
 
   //preScore(hand, jokers)
 
-  //scoreHand()
+  //scorePlayed()
 
   //scoreUnplayed() (Steel triggers))
 
@@ -70,7 +81,7 @@ function playHand(){
 
     Finally, retriggers (red seal, hack) can happen.
  */
-function scoreHand(hand: Card[], jokers: Joker[]){
+function scorePlayed(hand: Card[], jokers: Joker[]){
   //For scoring hand
   //check each card and update chip x mult
     //if card is +30 chips, only increase chips once (ace would be one case of +41)
@@ -78,12 +89,15 @@ function scoreHand(hand: Card[], jokers: Joker[]){
     //jokers come after card evaluation
   const jokerFns = [];
   for (let joker of jokers){
-
+    let jokerName = '';
+    if (joker['activePhase'] === 'scorePlayed') jokerName = joker['name'];
+    if (jokerName) jokerFns.push(allJokerFunctions[jokerName]);
   }
 
   const chipIncreases = [];
   const multIncreases = [];
-  for (let card of hand){
+  for (let i = 0; i < hand.length; i++){
+    let card:Card = hand[i];
 
   }
 
