@@ -69,29 +69,44 @@ export type HandStatus = {
 export type DeckStatus = {
   deck: Card[],
   dealtCards: Card[], //handSize active cards, can be played or discarded.
-  selectedCards: Card[],
+  selectedCards: boolean[],
   playedCards: Card[],
   unplayedCards: Card[],
   usedCards: Card[], //discarded or played
   remainingCards: Card[], //deck remaining
 }
 
-type RunStatus = {
-  vouchers: VoucherTypes[],
-  handTypesInfo: {},
+type SkipTagTypes =  'uncommonJoker' | 'rareJoker' | 'negativeJoker' |
+  'foilJoker' | 'holoJoker' | 'polyJoker' |
+  'coupon' | 'rerollDiscount' | 'gainTwoJokers' |
+  'doubleMoney' | 'handPayoff' | 'discardPayoff' | 'skipPayoff' |
+  'celestialPack' | 'jokerPack' | 'tarotPack' | 'spectralPack' |
+  'bossReroll' | 'orbital';
+
+//FIXME: May also want a runSeed or similar
+//to handle what shops should carry for each round
+//for instance, which vouchers are still to come.
+export type RunStatus = {
+  hands: number,
+  discards: number,
+  handSize: number,
+
   currentRound: number,
   currentAnte: number,
   currentMoney: number,
+  scoreGoals: number[],
+  skipTag: SkipTagTypes | null,
+
+  vouchers: VoucherTypes[],
+  handTypesInfo: {},
 }
 
-type RoundStatus = {
+export type RoundStatus = {
   handsLeft: number,
   discardsLeft: number,
-  handSize: number,
-
   scoreForRound: number,
-  chipSoFar: number,
-  multSoFar: number,
+  chip: number,
+  mult: number,
 }
 
 /*

@@ -8,8 +8,14 @@ import {
   Enhancement,
   SpecialCardMod,
   Seal,
-  DeckStatus
+  DeckStatus,
+  RunStatus,
+  RoundStatus,
 } from '../types/misc'
+
+import {scoreGoals} from './score';
+
+export const baseHandSize = 8;
 
 export const rankNames = {
   1: 'ace',
@@ -116,7 +122,11 @@ export function enhanceCard(
 }
 
 
-export function makeDeckStatus(deck: Card[]): DeckStatus {
+export function buildDeckStatus(deck: Card[]=[]): DeckStatus {
+  if (deck.length === 0){
+    deck = buildStartDeck();
+  }
+
   const deckStatusTemplate = {
     deck: structuredClone(deck), //when moving to react, need to avoid mutating.
     dealtCards: [], //handSize active cards, can be played or discarded.
@@ -219,7 +229,7 @@ export function buildStartDeck(): Card[] {
 
 
 export function buildSimpleDeck(): Card[]{
-  const ranks = Array(5).fill(0).map((val, ind) => ind+1) as RankNum[];
+  const ranks = Array(5).fill(0).map((_, ind) => ind+1) as RankNum[];
   const suits: Suit[] = ['hearts', 'diamonds', 'spades', 'clubs'];
 
   let newDeck = [];
@@ -247,4 +257,41 @@ export function findCards(searchType:'suit'|'rank', match:Suit|RankNum, deck:Car
   return foundCards;
 }
 
+
 //TODO: templates for the various status types.
+export function buildRunStatus(
+  difficulty: 'normal'|'hard'|'hell'='normal',
+  hands=4, discards=3, startMoney=4,
+  handSize=baseHandSize
+): RunStatus {
+
+  const newStatus = {
+    hands,
+    discards,
+    handSize,
+
+    currentRound: 1,
+    currentAnte: 1,
+    currentMoney: startMoney,
+    scoreGoals: scoreGoals[difficulty],
+    skipTag: null,
+
+    vouchers: [],
+    handTypesInfo: {},
+  }
+
+  return newStatus;
+}
+
+
+export function buildRoundStatus(handsLeft=4, discardsLeft=3): RoundStatus {
+  const newStatus = {
+    handsLeft,
+    discardsLeft,
+    scoreForRound: 0,
+    chip: 0,
+    mult: 0,
+  }
+
+  return newStatus;
+}
