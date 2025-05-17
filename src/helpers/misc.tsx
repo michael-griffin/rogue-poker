@@ -168,6 +168,25 @@ function unselectAllCards(deckStatus:DeckStatus): DeckStatus {
 }
 
 
+function selectToggle(deckStatus:DeckStatus, selectInd: number): DeckStatus {
+  let newStatus = structuredClone(deckStatus);
+  if (newStatus.selectedCards.length === 0) {
+    newStatus.selectedCards = Array(newStatus.dealtCards.length).fill(false);
+  }
+  if (selectInd > newStatus.selectedCards.length) return newStatus;
+
+  newStatus.selectedCards[selectInd] = !newStatus.selectedCards[selectInd];
+  return newStatus;
+}
+
+function selectCards(deckStatus:DeckStatus, indices: number[]): DeckStatus {
+  let newStatus = structuredClone(deckStatus);
+  for (let ind of indices){
+    newStatus = selectToggle(newStatus, ind);
+  }
+
+  return newStatus;
+}
 /** move selectedCards to usedCards
  * deal selectedCard.length new cards from remaining
  */
