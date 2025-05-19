@@ -27,6 +27,7 @@ export type Joker = {
   name: string,
   special: SpecialJokerMod | null, //holo, foil, poly
   negative: boolean,
+  rarity: "common" | "uncommon" | "rare",
   price: number,
   sellValue: number,
   activePhase: string,
