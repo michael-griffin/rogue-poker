@@ -4,6 +4,10 @@ import {
   buildRoundStatus,
   buildDeckStatus,
   buildStartDeck,
+  selectCards,
+  dealCards,
+  discardCards,
+  playCards,
  } from '../helpers/misc';
 import {
   DeckStatus,
@@ -35,7 +39,8 @@ function playGame() {
   }
 
   if (playBind){
-    let roundResults = playRound(deckStatus, runStatus, roundStatus);
+    let instructions = buildRoundInstructions();
+    let roundResults = playRound(deckStatus, runStatus, roundStatus, instructions);
     deckStatus = roundResults.deckStatus;
     runStatus = roundResults.runStatus;
     roundStatus = roundResults.roundStatus;
@@ -45,20 +50,7 @@ function playGame() {
 
   //Go to Shop
 
-
-
-  for (let roundGoal of roundGoals){
-    score = playRound();
-    if (score < roundGoal){
-      lost = true;
-      break;
-    }
-  }
-  if (lost){
-    console.log('oops');
-  } else {
-    console.log('hurray');
-  }
+  //Prepare for next round
 }
 
 /**
@@ -83,17 +75,51 @@ function setupStart(difficulty:'normal'|'hard'|'hell'='normal') {
 }
 
 
+//number[] are the indices of cards to discard or play
+//buildRoundInstructions makes n of these
+type RoundInstruction = ['discard'|'play', number[]];
+/**
+ *
+ */
 function playRound(deckStatusStart:DeckStatus,
   runStatusStart:RunStatus,
-  roundStatusStart:RoundStatus){
+  roundStatusStart:RoundStatus,
+  instructions:RoundInstruction[]){
+
+  let currentDeck:DeckStatus = structuredClone(deckStatusStart);
+  let currentRun:RunStatus = structuredClone(runStatusStart);
+  let currentRound:RoundStatus = structuredClone(roundStatusStart);
 
   //increment Round
+  currentRun.currentRound = currentRun.currentRound + 1;
 
   //deal starting hand
+  currentDeck = dealCards(currentDeck, currentRun.handSize);
 
-  //interface with player?
-  //player must select, then discard or play, how are these commands given?
-  //round must continue until score is reached or hands played = 0.
+
+  //Loop through RoundInstructions
+  for (let i = 0; i < instructions.length; i++){
+    let [playDiscard, indices] = instructions[i];
+
+    currentDeck = selectCards(currentDeck, indices);
+    if (playDiscard === 'discard') {
+      if (currentRound.discardsLeft === 0){
+        console.log('skipped discard, none remaining');
+        continue;
+      }
+
+      currentDeck = discardCards(currentDeck);
+      currentRound.discardsLeft--;
+      continue;
+
+    } else { //play cards
+      currentDeck = playCards(currentDeck);
+      //score cards
+    }
+
+  }
+
+
 
   return {
     deckStatus: deckStatusStart,
@@ -101,6 +127,45 @@ function playRound(deckStatusStart:DeckStatus,
     roundStatus: roundStatusStart,
   }
 }
+
+
+//type RoundInstruction = ['discard'|'play', number[]];
+/** builds an array of round instructions
+ * can be play only or a mix of play/discard
+ * select size is an array that contains allowed select sizes:
+ * [1, 5] would have either 1 or 5 cards selected
+*/
+function buildRoundInstructions(playOnly=true, len=4, selectSize=5){
+  const instructions:RoundInstruction[] = [];
+
+  for (let i = 0; i < len; i++){
+    let indices = chooseRandom(selectSize);
+    let playDiscard:'play'|'discard' = 'play';
+    if (!playOnly && Math.round(Math.random())) playDiscard = 'discard';
+
+    instructions.push([playDiscard, indices] as RoundInstruction);
+  }
+
+  return instructions;
+}
+/** choose <count> random indices between 0 and handSize-1 */
+function chooseRandom(count:number){
+  let allIndices = Array(handSizeBase).fill(-1).map((_, ind) => ind);
+
+  function shuffle(base:number[]) {
+    let arr = structuredClone(base);
+    for (var i = arr.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+    }
+    return base;
+  }
+  let indices = shuffle(allIndices).slice(0,count);
+  return indices;
+}
+
 
 
 

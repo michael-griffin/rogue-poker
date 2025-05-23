@@ -103,6 +103,11 @@ function scorePlayed(hand: Card[], jokers: Joker[]){
 
 }
 
+//FIXME: find a working data structure that scorePlayed can return.
+let scoringHistory = {
+  cardScores: [{index: 1, chipIncreases:[]}]
+}
+
 //how to handle pre-scoring jokers like midas
 //could have separation:
 //in demo

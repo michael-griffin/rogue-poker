@@ -147,7 +147,7 @@ export function buildDeckStatus(deck: Card[]=[]): DeckStatus {
  *  Note: if there are too few cards remaining, will deal only the remaining,
  *  resulting in a smaller hand.
  */
-function dealCards(deckStatus:DeckStatus, numCards: number): DeckStatus {
+export function dealCards(deckStatus:DeckStatus, numCards: number): DeckStatus {
   let newStatus = structuredClone(deckStatus);
 
   //JS handles case of too little remaining automatically:
@@ -161,7 +161,7 @@ function dealCards(deckStatus:DeckStatus, numCards: number): DeckStatus {
   return newStatus;
 }
 
-function unselectAllCards(deckStatus:DeckStatus): DeckStatus {
+export function unselectAllCards(deckStatus:DeckStatus): DeckStatus {
   const newStatus = structuredClone(deckStatus);
   newStatus['selectedCards'] = Array(newStatus['dealtCards'].length).fill(false);
   return newStatus;
@@ -179,7 +179,8 @@ function selectToggle(deckStatus:DeckStatus, selectInd: number): DeckStatus {
   return newStatus;
 }
 
-function selectCards(deckStatus:DeckStatus, indices: number[]): DeckStatus {
+
+export function selectCards(deckStatus:DeckStatus, indices: number[]): DeckStatus {
   let newStatus = structuredClone(deckStatus);
   for (let ind of indices){
     newStatus = selectToggle(newStatus, ind);
@@ -187,11 +188,12 @@ function selectCards(deckStatus:DeckStatus, indices: number[]): DeckStatus {
 
   return newStatus;
 }
+
+
 /** move selectedCards to usedCards
  * deal selectedCard.length new cards from remaining
  */
-
-function discardCards(deckStatus: DeckStatus): DeckStatus {
+export function discardCards(deckStatus: DeckStatus): DeckStatus {
   const newStatus = structuredClone(deckStatus);
   const {dealtCards, selectedCards} = deckStatus;
   const discarded = dealtCards.filter((_, ind) => selectedCards[ind]);
@@ -208,7 +210,7 @@ function discardCards(deckStatus: DeckStatus): DeckStatus {
 /** Moves selectedCards to playedCards, copies unselected to unplayedCards,
  *  and removes playedCards from dealtCards
  */
-function playCards(deckStatus:DeckStatus): DeckStatus {
+export function playCards(deckStatus:DeckStatus): DeckStatus {
   const newStatus = structuredClone(deckStatus);
   const {dealtCards, selectedCards} = deckStatus;
   const playedCards = dealtCards.filter((_, ind) => selectedCards[ind]);

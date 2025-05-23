@@ -1,4 +1,6 @@
 //https://balatrogame.fandom.com/wiki/Card_Modifiers
+//TODO: update check functions to replace scoringHand (Card[]) with
+//scoredCards (boolean[])
 
 import {
   RankNum,
@@ -6,7 +8,7 @@ import {
   Card,
   Joker,
   HandTypes,
-  HandInfo,
+  HandStatus,
 } from '../types/misc'
 import {getRankInfo} from './misc';
 
@@ -27,38 +29,39 @@ import {getRankInfo} from './misc';
 /* Hand collection data structure
 
 /**
- * Builds the handInfo object above by calling each checkHand function
+ * Builds the handStatus object above by calling each checkHand function
  *
  */
 function checkAllHands(currentHand: Card[]){
   //checkFlush
-  //update handInfo
+  //update handStatus
   //checkStraight + update
 
   //CheckPairs (and helper calls?)
-  const handInfo: HandInfo = {
+  const handStatus: HandStatus = {
+    hand: [],
     bestHand: 'highCard',
     highScore: 0,
     handTypes: [],
-    scoringHands: {},
+    scoredCards: {},
   };
   /*
   let checkFunctions = [checkPair, checkFlush, checkStraight];
   for (let checkFunction of checkFunctions){
     const {match, handType, scoringHand} = checkFunction(currentHand);
     if (match){
-      //update handInfo
+      //update handStatus
     }
   }
   */
-  return handInfo;
+  return handStatus;
 }
 
 
 type CheckResult = {
   match: boolean,
   handType: HandTypes,
-  scoringHand: Card[]
+  scoredCards: boolean[]
 }
 
 type CheckHandfn = (hand: Card[]) => CheckResult
@@ -66,7 +69,7 @@ function checkHand(hand: Card[]): CheckResult {
   return {
     match: true,
     handType: 'pair',
-    scoringHand: hand
+    scoredCards: [] //true true false false false for an example pair.
   }
 }
 checkHand satisfies CheckHandfn

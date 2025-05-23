@@ -223,3 +223,7 @@ function filterJokers(jokers: Jokers, rarity: 'common'|'uncommon'|'rare'){
 
   return filtered;
 }
+
+export const commonJokers = filterJokers(allJokers, 'common');
+export const uncommonJokers = filterJokers(allJokers, 'uncommon');
+export const rareJokers = filterJokers(allJokers, 'rare');

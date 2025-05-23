@@ -65,13 +65,37 @@ describe('check high card to five', function() {
   })
 })
 
-/*
+
 describe('check two pair and full house', function(){
 
+  let kingHearts = makeCard(13, 'hearts');
+  let kingHeartsTwo = makeCard(13, 'hearts');
+  let kingHeartsThree = makeCard(13, 'hearts');
+  let queenHearts = makeCard(12, 'hearts');
+  let queenHeartsTwo = makeCard(12, 'hearts');
+  let queenSpades = makeCard(12, 'spades');
+  let jackSpades = makeCard(11, 'spades');
+
+  const handFlushHouse = [kingHearts, kingHeartsTwo, kingHeartsThree,
+    queenHearts, queenHeartsTwo];
+  const handFullHouse = handFlushHouse;
+  handFullHouse[4] = queenSpades;
+  const handTwoPair = handFlushHouse;
+  handTwoPair[2] = jackSpades;
+
+  test('two pair', function() {
+
+  })
+  test('full house', function() {
+
+  })
+  test('flush house', function() {
+
+  })
 })
 
 
-
+/*
 //Test Flush
 describe('checkFlush', function() {
   //filter deck to cards of 1 suit, pull 5 cards of that suit
