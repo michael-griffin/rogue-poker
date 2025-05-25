@@ -32,7 +32,7 @@ import {getRankInfo} from './misc';
  * Builds the handStatus object above by calling each checkHand function
  *
  */
-function checkAllHands(currentHand: Card[]){
+export function checkAllHands(currentHand: Card[]){
   //checkFlush
   //update handStatus
   //checkStraight + update

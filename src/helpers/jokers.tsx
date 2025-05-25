@@ -142,7 +142,7 @@ export const theDuo: Joker = {
   rarity: 'rare',
   price: 8,
   sellValue: 4,
-  activePhase: 'scorePlayed', //FIXME: activePhase is wrong
+  activePhase: 'scoreJokers',
   description: 'x2 mult if played hand contains pair',
 };
 function theDuoFn(handStatus: HandStatus){
@@ -164,7 +164,7 @@ export const theTrio: Joker = {
   rarity: 'rare',
   price: 8,
   sellValue: 4,
-  activePhase: 'scorePlayed', //FIXME: activePhase is wrong
+  activePhase: 'scoreJokers',
   description: 'x3 mult if played hand contains pair',
 };
 function theTrioFn(handStatus: HandStatus){

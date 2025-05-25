@@ -53,30 +53,6 @@ export type Joker = {
   }
 }
 */
-export type HandTypes = 'highCard' | 'pair' | 'threeOf' | 'fourOf' |
-  'fiveOf' | 'flushFive' | 'twoPair' | 'fullHouse' | 'flushHouse' |
-  'flush' | 'straight' | 'straightFlush' | 'royalFlush';
-
-//FIXME: string is less specific, but using HandTypes or [key in HandTypes]: Card[]
-//has TS expect ALL of the provided handtypes
-export type HandStatus = {
-  hand: Card[],
-  bestHand: HandTypes,
-  highScore: number,
-  handTypes: HandTypes[]
-  scoredCards: Record<string, boolean[]>;
-}
-
-export type DeckStatus = {
-  deck: Card[],
-  dealtCards: Card[], //handSize active cards, can be played or discarded.
-  selectedCards: boolean[],
-  playedCards: Card[],
-  unplayedCards: Card[],
-  usedCards: Card[], //discarded or played
-  remainingCards: Card[], //deck remaining
-}
-
 type SkipTagTypes =  'uncommonJoker' | 'rareJoker' | 'negativeJoker' |
   'foilJoker' | 'holoJoker' | 'polyJoker' |
   'coupon' | 'rerollDiscount' | 'gainTwoJokers' |
@@ -102,6 +78,7 @@ export type RunStatus = {
   handTypesInfo: {},
 }
 
+
 export type RoundStatus = {
   handsLeft: number,
   discardsLeft: number,
@@ -109,6 +86,33 @@ export type RoundStatus = {
   chip: number,
   mult: number,
 }
+
+
+export type DeckStatus = {
+  deck: Card[],
+  dealtCards: Card[], //handSize active cards, can be played or discarded.
+  selectedCards: boolean[],
+  playedCards: Card[],
+  unplayedCards: Card[],
+  usedCards: Card[], //discarded or played
+  remainingCards: Card[], //deck remaining
+}
+
+
+export type HandTypes = 'highCard' | 'pair' | 'threeOf' | 'fourOf' |
+  'fiveOf' | 'flushFive' | 'twoPair' | 'fullHouse' | 'flushHouse' |
+  'flush' | 'straight' | 'straightFlush' | 'royalFlush';
+//FIXME: string is less specific, but using HandTypes or [key in HandTypes]: Card[]
+//has TS expect ALL of the provided handtypes
+export type HandStatus = {
+  hand: Card[],
+  bestHand: HandTypes,
+  highScore: number,
+  handTypes: HandTypes[]
+  scoredCards: Record<string, boolean[]>;
+}
+
+
 
 /*
 type RunInfo = {

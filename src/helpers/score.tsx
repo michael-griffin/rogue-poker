@@ -5,8 +5,11 @@ https://balatrogame.fandom.com/wiki/Poker_Hands
 https://balatrogame.fandom.com/wiki/Planet_Cards
 */
 
-import { allJokerFunctions } from "./jokers";
-import { Joker, Card} from "../types/misc";
+//import { allJokerFunctions } from "./jokers";
+import { Joker, Card,
+  RunStatus, DeckStatus, RoundStatus, HandStatus} from "../types/misc";
+import { findActiveJokers } from "./misc";
+import { checkAllHands } from "./check";
 
 /*base scoring goals for each ante, starting at Ante 0
 * small blinds are x1, big x1.5, boss x2
@@ -50,18 +53,53 @@ const levelUps = {
   'royalFlush':     {'chip': 40, 'mult': 4},
 }
 
-/** controller function, in order, executes:
+/** Runs through the records created during scorePhase.
+ * updates the RoundStatus scoring numbers. */
+function updateScore(
+  roundStatus:RoundStatus,
+  playedRecord:ScoreChange[],
+  unplayedRecord:ScoreChange[],
+  jokerRecord:ScoreChange[]){
+
+  let roundUpdated = structuredClone(roundStatus);
+
+  let allRecords = [playedRecord, unplayedRecord, jokerRecord];
+  for (let records of allRecords){
+    for (let record of records){
+      let {id, value, change} = record;
+      if (change === 'chip'){
+        roundUpdated.chip = roundUpdated.chip + value;
+      } else if (change === 'mult'){
+        roundUpdated.mult = roundUpdated.mult + value;
+      } else if (change === 'multTimes'){
+        roundUpdated.mult = roundUpdated.mult * value;
+      }
+    }
+  }
+
+  return roundUpdated;
+}
+
+/** controller function.
+ * Goal is to run several scoring sub functions, then
+ * create a set of records. These records will run through
+ * updating the score as it goes, in order, executes:
  * preScore
  */
-function playHand(){
+function scorePhase(deckStatusStart:DeckStatus,
+  runStatusStart:RunStatus,
+  roundStatusStart:RoundStatus,){
 
-  //preScore(hand, jokers)
+  //checkAllHands (from check)
 
-  //scorePlayed()
 
-  //scoreUnplayed() (Steel triggers))
+  //preScore(hand, jokers) //eg, convert cards to gold/strip enhancements
 
-  //scoreJokers()
+  //scorePlayed() //checks hand, creates playedRecord
+
+  //scoreUnplayed() //Steel triggers + Red Seals
+
+  //scoreJokers() //pair/flush bonuses
 
 }
 /**
@@ -81,32 +119,57 @@ function playHand(){
 
     Finally, retriggers (red seal, hack) can happen.
  */
-function scorePlayed(hand: Card[], jokers: Joker[]){
+//FIXME:if not passing handStatus, needs to call checkAllHands
+function scorePlayed(cards: Card[], jokers: Joker[]){
+  let playedRecord: ScoreChange[] = [];
   //For scoring hand
   //check each card and update chip x mult
     //if card is +30 chips, only increase chips once (ace would be one case of +41)
     //mult comes after chips
     //jokers come after card evaluation
-  const jokerFns = [];
-  for (let joker of jokers){
-    let jokerName = '';
-    if (joker['activePhase'] === 'scorePlayed') jokerName = joker['name'];
-    if (jokerName) jokerFns.push(allJokerFunctions[jokerName]);
-  }
+  const jokerFns = findActiveJokers(jokers, 'scorePlayed');
+  const checkResults = checkAllHands(cards);
 
-  const chipIncreases = [];
-  const multIncreases = [];
-  for (let i = 0; i < hand.length; i++){
-    let card:Card = hand[i];
 
-  }
+  //find best handType,
+  //TODO: iterate through cards -> if a scoredCard, update playedRecord
 
 }
 
-//FIXME: find a working data structure that scorePlayed can return.
-let scoringHistory = {
-  cardScores: [{index: 1, chipIncreases:[]}]
+
+/** Check held cards for steel (+red seal). Does not check for blue seal */
+function scoreUnplayed(cards: Card[], jokers: Joker[]){
+  let unplayedRecord: ScoreChange[] = [];
+
+  //Check for steel cards/red seal
+  for (let i = 0; i < cards.length; i++){
+    let card = cards[i];
+    if (card.enhanced === 'steel'){
+      let scoreChange = {id: i, value: 1.5, change: 'multTimes'} as ScoreChange;
+      unplayedRecord.push(scoreChange);
+      if (card.seal === 'red') unplayedRecord.push(scoreChange);
+    }
+  }
+
+  return unplayedRecord;
 }
+
+
+function scoreJokers(cards: Card[], jokers: Joker[]){
+  let jokerRecord: ScoreChange[] = [];
+}
+
+
+
+
+type ScoreChange = {id: number, value: number, change: 'chip'|'mult'|'multTimes'};
+// type ScoreRecord = {
+//   handScore: number,
+//   roundScore: number,
+//   playedRecord: ScoreChange[],
+//   unplayedRecord: ScoreChange[],
+//   jokerRecord: ScoreChange[],
+// }
 
 //how to handle pre-scoring jokers like midas
 //could have separation:
@@ -115,3 +178,5 @@ let scoringHistory = {
   //pre-score mods (midas, vampire)
   //scoreHand
   //post-score mods.
+
+

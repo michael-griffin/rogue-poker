@@ -13,6 +13,7 @@ import {
   RoundStatus,
 } from '../types/misc'
 
+import { allJokerFunctions } from "./jokers";
 import {scoreGoals} from './score';
 
 export const baseHandSize = 8;
@@ -264,7 +265,7 @@ export function buildSimpleDeck(): Card[]{
 }
 
 
-export function findCards(searchType:'suit'|'rank', match:Suit|RankNum, deck:Card[]){
+export function findCards(deck:Card[], searchType:'suit'|'rank', match:Suit|RankNum){
   let foundCards: Card[] = [];
   if (searchType === 'suit'){
     foundCards = deck.filter(card => {
@@ -276,6 +277,21 @@ export function findCards(searchType:'suit'|'rank', match:Suit|RankNum, deck:Car
     });
   }
   return foundCards;
+}
+
+
+/** Finds jokers that match the current phase of play, and returns their functions
+ * activePhased could be scorePlayed, scoreJokers, or others...
+ */
+export function findActiveJokers(jokers:Joker[], activePhase:string){
+  const jokerFns = [];
+  for (let joker of jokers){
+    let jokerName = '';
+    if (joker['activePhase'] === activePhase) jokerName = joker['name'];
+    if (jokerName) jokerFns.push(allJokerFunctions[jokerName]);
+  }
+
+  return jokerFns;
 }
 
 
