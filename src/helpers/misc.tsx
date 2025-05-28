@@ -123,6 +123,23 @@ export function enhanceCard(
 }
 
 
+// export function getCardValue(card: Card){
+//   let cardValue = {
+//     chip: 0,
+//     mult: 0,
+//     multTimes: 0,
+//   };
+
+//   cardValue['chip'] = card.chip;
+//   if (card.enhanced === 'bonus') cardValue['chip'] += 30;
+//   if (card.enhanced === 'stone') cardValue['chip'] = 50;
+
+//   if (card.enhan)
+//   return {
+
+//   }
+// }
+
 export function buildDeckStatus(deck: Card[]=[]): DeckStatus {
   if (deck.length === 0){
     deck = buildStartDeck();
@@ -303,6 +320,7 @@ export function buildRunStatus(
 ): RunStatus {
 
   const newStatus = {
+    jokers: [],
     hands,
     discards,
     handSize,

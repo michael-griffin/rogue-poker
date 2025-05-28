@@ -64,6 +64,8 @@ type SkipTagTypes =  'uncommonJoker' | 'rareJoker' | 'negativeJoker' |
 //to handle what shops should carry for each round
 //for instance, which vouchers are still to come.
 export type RunStatus = {
+  jokers: Joker[],
+
   hands: number,
   discards: number,
   handSize: number,

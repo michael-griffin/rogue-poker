@@ -14,6 +14,10 @@ export type Joker = {
 */
 
 
+//activePhases:
+//blindSelect, playStart, discard??, scorePlayed, scoreJokers, roundEnd
+
+
 
 /*******************/
 /** COMMON JOKERS **/
@@ -30,7 +34,7 @@ export const slyJoker: Joker = {
   activePhase: 'scoreJokers',
   description: 'if hand contained a pair, +50 chip',
 };
-function slyJokerFn(hand: Card[]){
+function slyJokerFn(handStatus: HandStatus){
 
   return {
     chip: 50,
@@ -227,3 +231,25 @@ function filterJokers(jokers: Jokers, rarity: 'common'|'uncommon'|'rare'){
 export const commonJokers = filterJokers(allJokers, 'common');
 export const uncommonJokers = filterJokers(allJokers, 'uncommon');
 export const rareJokers = filterJokers(allJokers, 'rare');
+
+
+/************/
+/** ISSUES **/
+/************/
+
+/** Currently, some Jokers would be very hard to implement under the current
+ * configuration. Some notable cases are:
+ *
+ * Business Card: played faces have a 50% chance to give $2
+ * - problem: scorePlayed only keeps track of chip/mult/multTimes
+ * - possible fix: make a more general function like playRound that accepts
+ * - runStatus as a parameter.
+ *
+ * reTrigger Effects:
+ * Hack (played 2,3,4,5) similar to above, scorePlayed expects a single scoreChange
+ * Could either add a section IN scorePlayed (though this would be a messy one off)
+ * Or modify jokers to return playedRecords more generally, then return the full
+ * record (large overhaul).
+ *
+ *
+ */

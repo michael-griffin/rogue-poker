@@ -86,21 +86,39 @@ function updateScore(
  * updating the score as it goes, in order, executes:
  * preScore
  */
-function scorePhase(deckStatusStart:DeckStatus,
-  runStatusStart:RunStatus,
-  roundStatusStart:RoundStatus,){
-
-  //checkAllHands (from check)
+function scorePhase(deckStats:DeckStatus,
+  runStats:RunStatus,
+  roundStats:RoundStatus,){
 
 
   //preScore(hand, jokers) //eg, convert cards to gold/strip enhancements
 
   //scorePlayed() //checks hand, creates playedRecord
+  let playedRecord = scorePlayed(deckStats.playedCards, runStats.jokers);
+  for (let scoreChange of playedRecord){
+    let {change, value} = scoreChange;
+    if (change === 'chip') roundStats.chip += value;
+    else if (change === 'mult') roundStats.mult += value;
+    else if (change === 'multTimes') roundStats.mult *= value;
+  }
 
   //scoreUnplayed() //Steel triggers + Red Seals
+  let unplayedRecord = scorePlayed(deckStats.playedCards, runStats.jokers);
+  for (let scoreChange of unplayedRecord){
+    let {change, value} = scoreChange;
+    if (change === 'chip') roundStats.chip += value;
+    else if (change === 'mult') roundStats.mult += value;
+    else if (change === 'multTimes') roundStats.mult *= value;
+  }
 
   //scoreJokers() //pair/flush bonuses
-
+  let jokerRecord = scoreJokers(deckStats.playedCards, runStats.jokers);
+  for (let scoreChange of jokerRecord){
+    let {change, value} = scoreChange;
+    if (change === 'chip') roundStats.chip += value;
+    else if (change === 'mult') roundStats.mult += value;
+    else if (change === 'multTimes') roundStats.mult *= value;
+  }
 }
 /**
  The specific order is:
@@ -119,21 +137,80 @@ function scorePhase(deckStatusStart:DeckStatus,
 
     Finally, retriggers (red seal, hack) can happen.
  */
-//FIXME:if not passing handStatus, needs to call checkAllHands
 function scorePlayed(cards: Card[], jokers: Joker[]){
   let playedRecord: ScoreChange[] = [];
-  //For scoring hand
-  //check each card and update chip x mult
-    //if card is +30 chips, only increase chips once (ace would be one case of +41)
-    //mult comes after chips
-    //jokers come after card evaluation
+
   const jokerFns = findActiveJokers(jokers, 'scorePlayed');
-  const checkResults = checkAllHands(cards);
+  const checkResult = checkAllHands(cards);
+  const {bestHand} = checkResult;
+  const isScored = checkResult['scoredCards'][bestHand];
 
 
-  //find best handType,
-  //TODO: iterate through cards -> if a scoredCard, update playedRecord
+  for (let i = 0; i < cards.length; i++){
+    let card = cards[i];
+    if (isScored[i] || card['enhanced'] === 'stone'){
+      //score cards
+      let recordSegment = scorePlayedCard(card, i);
 
+      //add joker bonuses
+      for (let jokerFn of jokerFns){
+        let bonus = jokerFn(card); //returns {chip: 0, mult: 0, multTimes: 0}
+        for (let key in bonus){
+          if (bonus[key] > 0){
+            let scoreChange = {id: i, value: bonus[key], change: key} as ScoreChange;
+            recordSegment.push(scoreChange);
+          }
+        }
+      }
+
+      //retrigger
+      if (card.seal === 'red') recordSegment = [...recordSegment, ...recordSegment];
+      playedRecord = [...playedRecord, ...recordSegment];
+    }
+  }
+
+  return playedRecord;
+}
+/** helper function for scorePlayed, builds the record segment for an
+ * individual card that should be scored.
+ * Expects scored===true, and requires a card + id as parameters. */
+function scorePlayedCard(card: Card, id:number){
+  let playedRecord = [];
+  let scoreChange;
+
+  if (card.enhanced === 'stone'){
+    scoreChange = {id, value: 50, change: 'chip'} as ScoreChange;
+  } else {
+    scoreChange = {id, value: card.chip, change: 'chip'} as ScoreChange;
+  }
+
+  //chips done all in one, so before pushing add modifiers due to bonus/foil
+  if (scoreChange){
+    //chips
+    if (card['enhanced'] === 'bonus') scoreChange['value'] += 30;
+    if (card['special'] === 'foil') scoreChange['value'] += 50;
+    playedRecord.push(scoreChange);
+
+    //mult
+    scoreChange = {id, value: 0, change: 'mult'} as ScoreChange;
+    if (card['enhanced'] === 'mult') scoreChange['value'] += 4;
+    if (scoreChange['value'] > 0) playedRecord.push(scoreChange);
+
+    scoreChange = {id, value: 0, change: 'mult'} as ScoreChange;
+    if (card['special'] === 'holo') scoreChange['value'] += 10;
+    if (scoreChange['value'] > 0) playedRecord.push(scoreChange);
+
+    //multTimes
+    scoreChange = {id, value: 0, change: 'multTimes'} as ScoreChange;
+    if (card['enhanced'] === 'glass') scoreChange['value'] = 2;
+    if (scoreChange['value'] > 0) playedRecord.push(scoreChange);
+
+    scoreChange = {id, value: 0, change: 'multTimes'} as ScoreChange;
+    if (card['special'] === 'poly') scoreChange['value'] = 1.5;
+    if (scoreChange['value'] > 0) playedRecord.push(scoreChange);
+  }
+
+  return playedRecord;
 }
 
 
@@ -157,6 +234,24 @@ function scoreUnplayed(cards: Card[], jokers: Joker[]){
 
 function scoreJokers(cards: Card[], jokers: Joker[]){
   let jokerRecord: ScoreChange[] = [];
+  const checkResult = checkAllHands(cards);
+
+  //convoluted, but necessary to get index
+  for (let i = 0; i < jokers.length; i++){
+    const jokerFns = findActiveJokers([jokers[i]], 'scoreJokers');
+
+    if (jokerFns.length > 0){
+      let bonus = jokerFns[0](checkResult); //returns {chip: 0, mult: 0, multTimes: 0}
+      for (let key in bonus){
+        if (bonus[key] > 0){
+          let scoreChange = {id: i, value: bonus[key], change: key} as ScoreChange;
+          jokerRecord.push(scoreChange);
+        }
+      }
+    }
+  }
+
+  return jokerRecord;
 }
 
 

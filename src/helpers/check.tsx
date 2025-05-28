@@ -44,6 +44,7 @@ export function checkAllHands(currentHand: Card[]){
     highScore: 0,
     handTypes: [],
     scoredCards: {},
+    //bestScored: [], might be convenient to pull out bestHand's matching boolean[].
   };
   /*
   let checkFunctions = [checkPair, checkFlush, checkStraight];
