@@ -6,7 +6,7 @@ https://balatrogame.fandom.com/wiki/Planet_Cards
 */
 
 //import { allJokerFunctions } from "./jokers";
-import { Joker, Card,
+import { ScoreChange, Joker, Card,
   RunStatus, DeckStatus, RoundStatus, HandStatus} from "../types/misc";
 import { findActiveJokers } from "./misc";
 import { checkAllHands } from "./check";
@@ -15,6 +15,8 @@ import { checkAllHands } from "./check";
 * small blinds are x1, big x1.5, boss x2
 * green stake or higher leads to hard scaling, purpl to hell
 */
+
+/*
 export const scoreGoals = {
   normal: [100, 300, 800, 2000, 5000, 11000, 20000, 35000, 50000],
   hard: [100, 300, 900, 2600, 8000, 20000, 36000, 60000, 100000],
@@ -52,6 +54,7 @@ const levelUps = {
   'straightFlush':  {'chip': 40, 'mult': 4},
   'royalFlush':     {'chip': 40, 'mult': 4},
 }
+*/
 
 /** Runs through the records created during scorePhase.
  * updates the RoundStatus scoring numbers. */
@@ -88,7 +91,7 @@ function updateScore(
  */
 function scorePhase(deckStats:DeckStatus,
   runStats:RunStatus,
-  roundStats:RoundStatus,){
+  roundStats:RoundStatus){
 
 
   //preScore(hand, jokers) //eg, convert cards to gold/strip enhancements
@@ -257,7 +260,7 @@ function scoreJokers(cards: Card[], jokers: Joker[]){
 
 
 
-type ScoreChange = {id: number, value: number, change: 'chip'|'mult'|'multTimes'};
+
 // type ScoreRecord = {
 //   handScore: number,
 //   roundScore: number,

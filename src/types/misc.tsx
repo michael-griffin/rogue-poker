@@ -34,6 +34,22 @@ export type Joker = {
   description: string
 }
 
+export type Tarot = {
+  name: string,
+  price: number,
+  sellValue: number,
+  description: string
+}
+
+export type Planet = {
+  name: string,
+  chip: number,
+  mult: number,
+  price: number,
+  sellValue: number,
+  handType: HandTypes,
+  hidden: boolean //for flushFive, other 'secret' planets
+}
 /*
 {
   bestHand: 'flush',
@@ -77,7 +93,8 @@ export type RunStatus = {
   skipTag: SkipTagTypes | null,
 
   vouchers: VoucherTypes[],
-  handTypesInfo: {},
+  inventory: string[], //Tarots, Planets, Spectral Cards
+  handRecord: {},
 }
 
 
@@ -116,34 +133,38 @@ export type HandStatus = {
 
 
 
-/*
-type RunInfo = {
-  deck: Card[],
-  dealtCards: Card[], //handSize active cards, can be played or discarded.
-  selectedCards: Card[],
-  playedCards: Card[],
-  unplayedCards: Card[],
-  usedCards: Card[], //discarded or played
-  remainingCards: Card[], //deck remaining
-
-  vouchers: VoucherTypes[],
-  handTypesInfo: {},
-
-  currentRound: number,
-  currentAnte: number,
-  currentMoney: number,
-
-  handsLeft: number,
-  discardsLeft: number,
-  handSize: number,
-
-  scoreForRound: number,
-  chipSoFar: number,
-  multSoFar: number,
-}
-*/
-
-type VoucherTypes = 'blank' | 'bossReroll' | 'clearance' | 'consumable' |
+export type VoucherTypes = 'blank' | 'bossReroll' | 'clearance' | 'consumable' |
   'discardsLeft' | 'handsLeft' | 'handSize' | 'hieroglyph' | 'overstock' |
   'planet' | 'reroll' | 'seedMoney' | 'shopCards' | 'specialCards' |
   'tarot' | 'telescope';
+
+
+export type Pack = {
+  packType: 'planet'|'tarot',
+  size: 'normal'|'jumbo'|'mega',
+  version: 1|2,
+};
+
+
+export type ScoreChange = {
+  id: number,
+  value: number,
+  change: 'chip'|'mult'|'multTimes'
+};
+
+
+export type HandRecord = {
+    highCard:       {play: number, level: number},
+    pair:           {play: number, level: number},
+    threeOf:        {play: number, level: number},
+    fourOf:         {play: number, level: number},
+    fiveOf:         {play: number, level: number},
+    flushFive:      {play: number, level: number},
+    twoPair:        {play: number, level: number},
+    fullHouse:      {play: number, level: number},
+    flushHouse:     {play: number, level: number},
+    flush:          {play: number, level: number},
+    straight:       {play: number, level: number},
+    straightFlush:  {play: number, level: number},
+    royalFlush:     {play: number, level: number},
+  };

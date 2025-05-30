@@ -15,7 +15,8 @@ export type Joker = {
 
 
 //activePhases:
-//blindSelect, playStart, discard??, scorePlayed, scoreJokers, roundEnd
+//roundStart(blindSelect), playStart, discard??,
+// scorePlayed, scoreJokers, roundEnd
 
 
 

@@ -2,53 +2,25 @@ import {
   RankNum,
   CardType,
   Suit,
-  Card,
-  Joker,
   RankName,
   Enhancement,
   SpecialCardMod,
   Seal,
+  Card,
+  Joker,
+  Tarot,
+  Planet,
+  Pack,
+  VoucherTypes,
   DeckStatus,
   RunStatus,
   RoundStatus,
 } from '../types/misc'
 
 import { allJokerFunctions } from "./jokers";
-import {scoreGoals} from './score';
+import {baseHandSize, rankNames, chipValues, shopRates, allVouchers,
+  scoreGoals, baseScores, levelUps} from './constants';
 
-export const baseHandSize = 8;
-
-export const rankNames = {
-  1: 'ace',
-  2: '2',
-  3: '3',
-  4: '4',
-  5: '5',
-  6: '6',
-  7: '7',
-  8: '8',
-  9: '9',
-  10: '10',
-  11: 'jack',
-  12: 'queen',
-  13: 'king'
-};
-
-export const chipValues = {
-  1: 11,
-  2: 2,
-  3: 3,
-  4: 4,
-  5: 5,
-  6: 6,
-  7: 7,
-  8: 8,
-  9: 9,
-  10: 10,
-  11: 10,
-  12: 10,
-  13: 10
-}
 
 //type RankNum = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
 type RankInfo = {
@@ -252,6 +224,90 @@ function postPlayCleanup(deckStatus:DeckStatus): DeckStatus {
 }
 
 
+function finishRound(deckStatusStart:DeckStatus,
+  runStatusStart:RunStatus,
+  roundStatusStart:RoundStatus) {
+
+  let currentDeck:DeckStatus = structuredClone(deckStatusStart);
+  let currentRun:RunStatus = structuredClone(runStatusStart);
+  let currentRound:RoundStatus = structuredClone(roundStatusStart);
+
+  const jokerFns = findActiveJokers(currentRun['jokers'], 'roundEnd');
+  //update egg, destroy banana, cash in from cloud9/rocket ship.
+
+
+  //Update Money
+  const moneyForHands = currentRound['handsLeft'];
+  const moneyForInterest = Math.floor(currentRun['currentMoney'] / 5);
+  currentRun['currentMoney'] += moneyForHands + moneyForInterest;
+
+
+  //build new roundStatus
+  let cleanRoundStats = buildRoundStatus(currentRun['hands'], currentRun['discards']);
+
+
+  return {
+    deckStatus: currentDeck,
+    runStatus: currentRun,
+    roundStatus: cleanRoundStats,
+  }
+}
+
+/** Trickier than it seems. Vouchers can add card/tarot to the shelf */
+function stockShop(runStatus:RunStatus){
+  const newStock = buildStock();
+  //add shelf items
+
+  //add voucher
+  let possVouchers = structuredClone(allVouchers);
+  let ownedVouchers = runStatus['vouchers'];
+  possVouchers = possVouchers.filter(voucher => !ownedVouchers.includes(voucher));
+  possVouchers = shuffle(possVouchers);
+  newStock['voucher'].push(possVouchers[0]);
+
+
+  //add packs
+  let possPacks = buildPackVariations();
+  possPacks = shuffle(possPacks);
+  newStock['pack'].push(possPacks[0]);
+  newStock['pack'].push(possPacks[1]);
+
+  return newStock;
+}
+// stock = {
+//   'shelf': [{category: 'joker', item: jokerInst}, ...],
+//   'voucher': [VoucherTypes],
+//   'pack': [{packType: planet|tarot, size:]
+// }
+type ShelfItem = {category: string, item:Joker|Card|Tarot|Planet};
+function buildStock(){
+  const shelf:ShelfItem[] = [];
+  const voucher:VoucherTypes[] = [];
+  const pack:Pack[] = [];
+  return {shelf, voucher, pack};
+}
+function buildPackVariations(){
+  let packs:Pack[] = [];
+  let packTypes = ['planet', 'tarot'];
+  let sizes = ['normal', 'jumbo', 'mega'];
+  let versions = [1, 2];
+
+  for (let packType of packTypes){
+    for (let size of sizes){
+      for (let version of versions){
+        let newPack = {packType, size, version} as Pack;
+        packs.push(newPack);
+      }
+    }
+  }
+
+  return packs;
+}
+// function buyItem(stock, category:'shelf'|'voucher'|'pack', ind=0){
+
+// }
+
+
 export function buildStartDeck(): Card[] {
   const ranks = Array(13).fill(0).map((_, ind) => ind+1) as RankNum[];
   const suits: Suit[] = ['hearts', 'diamonds', 'spades', 'clubs'];
@@ -312,7 +368,6 @@ export function findActiveJokers(jokers:Joker[], activePhase:string){
 }
 
 
-//TODO: templates for the various status types.
 export function buildRunStatus(
   difficulty: 'normal'|'hard'|'hell'='normal',
   hands=4, discards=3, startMoney=4,
@@ -332,7 +387,8 @@ export function buildRunStatus(
     skipTag: null,
 
     vouchers: [],
-    handTypesInfo: {},
+    inventory: [],
+    handRecord: buildHandRecord(),
   }
 
   return newStatus;
@@ -349,4 +405,38 @@ export function buildRoundStatus(handsLeft=4, discardsLeft=3): RoundStatus {
   }
 
   return newStatus;
+}
+
+
+
+export function buildHandRecord(){
+  const handRecord = {
+    highCard:       {play: 0, level: 0},
+    pair:           {play: 0, level: 0},
+    threeOf:        {play: 0, level: 0},
+    fourOf:         {play: 0, level: 0},
+    fiveOf:         {play: 0, level: 0},
+    flushFive:      {play: 0, level: 0},
+    twoPair:        {play: 0, level: 0},
+    fullHouse:      {play: 0, level: 0},
+    flushHouse:     {play: 0, level: 0},
+    flush:          {play: 0, level: 0},
+    straight:       {play: 0, level: 0},
+    straightFlush:  {play: 0, level: 0},
+    royalFlush:     {play: 0, level: 0},
+  };
+
+  return handRecord;
+}
+
+/** Given an array, returns a new array with shuffled contents */
+export function shuffle(base:any[]) {
+  let arr = structuredClone(base);
+  for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var temp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = temp;
+  }
+  return base;
 }

@@ -8,6 +8,7 @@ import {
   dealCards,
   discardCards,
   playCards,
+  shuffle,
  } from '../helpers/misc';
 import {
   DeckStatus,
@@ -151,17 +152,6 @@ function buildRoundInstructions(playOnly=true, len=4, selectSize=5){
 /** choose <count> random indices between 0 and handSize-1 */
 function chooseRandom(count:number){
   let allIndices = Array(handSizeBase).fill(-1).map((_, ind) => ind);
-
-  function shuffle(base:number[]) {
-    let arr = structuredClone(base);
-    for (var i = arr.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var temp = arr[i];
-        arr[i] = arr[j];
-        arr[j] = temp;
-    }
-    return base;
-  }
   let indices = shuffle(allIndices).slice(0,count);
   return indices;
 }
