@@ -63,3 +63,5 @@ export const allPlanets:Planets = {
   uranus,
   venus,
 }
+
+export const allPlanetsList = Object.values(allPlanets);

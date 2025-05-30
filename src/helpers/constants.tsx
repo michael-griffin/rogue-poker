@@ -7,7 +7,7 @@ export const scoreGoals = {
 }
 export const baseHandSize = 8;
 
-export const shopRates = {
+export const shopInfo = {
   shelfRates: {
     'joker': 20,
     'planet': 4,

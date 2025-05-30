@@ -233,6 +233,9 @@ export const commonJokers = filterJokers(allJokers, 'common');
 export const uncommonJokers = filterJokers(allJokers, 'uncommon');
 export const rareJokers = filterJokers(allJokers, 'rare');
 
+export const commonJokersList = Object.values(commonJokers);
+export const uncommonJokersList = Object.values(uncommonJokers);
+export const rareJokersList = Object.values(rareJokers);
 
 /************/
 /** ISSUES **/

@@ -17,9 +17,13 @@ import {
   RoundStatus,
 } from '../types/misc'
 
-import { allJokerFunctions } from "./jokers";
-import {baseHandSize, rankNames, chipValues, shopRates, allVouchers,
+import { allJokerFunctions,
+  commonJokersList, uncommonJokersList, rareJokersList,
+  uncommonJokers} from "./jokers";
+import {baseHandSize, rankNames, chipValues, shopInfo, allVouchers,
   scoreGoals, baseScores, levelUps} from './constants';
+import { allTarotsList } from './tarots';
+import { allPlanetsList } from './planets';
 
 
 //type RankNum = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
@@ -224,7 +228,7 @@ function postPlayCleanup(deckStatus:DeckStatus): DeckStatus {
 }
 
 
-function finishRound(deckStatusStart:DeckStatus,
+export function finishRound(deckStatusStart:DeckStatus,
   runStatusStart:RunStatus,
   roundStatusStart:RoundStatus) {
 
@@ -257,6 +261,7 @@ function finishRound(deckStatusStart:DeckStatus,
 function stockShop(runStatus:RunStatus){
   const newStock = buildStock();
   //add shelf items
+  newStock['shelf'] = restockShelf();
 
   //add voucher
   let possVouchers = structuredClone(allVouchers);
@@ -285,6 +290,57 @@ function buildStock(){
   const voucher:VoucherTypes[] = [];
   const pack:Pack[] = [];
   return {shelf, voucher, pack};
+}
+//TODO: currently missing special edition implementation.
+function restockShelf(){
+  let newShelf:ShelfItem[] = [];
+  let possItems = [];
+  let possRarities = [];
+  const {shelfRates, jokerRates} = shopInfo;
+  for (let [category, quantity] of Object.entries(shelfRates)){
+    for (let i = 0; i < quantity; i++){
+      possItems.push(category);
+    }
+  }
+  for (let [rarity, quantity] of Object.entries(jokerRates)){
+    for (let i = 0; i < quantity; i++){
+      possRarities.push(rarity);
+    }
+  }
+
+  possItems = shuffle(possItems);
+  possRarities = shuffle(possRarities);
+
+  let planets = shuffle(allPlanetsList);
+  let tarots = shuffle(allTarotsList);
+  let commonJokers = shuffle(commonJokersList);
+  let uncommonJokers = shuffle(uncommonJokersList);
+  let rareJokers = shuffle(rareJokersList);
+  for (let i = 0; i < 2; i++){ //TODO: increase to 4 to handle overstock voucher.
+    let category = possItems[i];
+    let nextItem:Planet|Tarot|Joker|Card; //TODO: add card.
+
+    if (category === 'planet'){
+      nextItem = planets[i];
+    } else if (category === 'tarot'){
+      nextItem = tarots[i];
+    } else { // if (category === 'joker'){
+      let rarity = possRarities[i];
+      if (rarity === 'common'){
+        nextItem = commonJokers[i];
+      } else if (rarity === 'uncommon'){
+        nextItem = uncommonJokers[i];
+      } else { //if (rarity === 'rare'){
+        nextItem = rareJokers[i];
+      }
+      possRarities = shuffle(possRarities);
+    }
+
+    newShelf.push({category, item: nextItem});
+  }
+
+
+  return newShelf;
 }
 function buildPackVariations(){
   let packs:Pack[] = [];

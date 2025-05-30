@@ -25,3 +25,5 @@ type Tarots = {
 export const allTarots:Tarots = {
   loversTarot,
 }
+
+export const allTarotsList = Object.values(allTarots);
