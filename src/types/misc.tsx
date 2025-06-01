@@ -76,6 +76,17 @@ type SkipTagTypes =  'uncommonJoker' | 'rareJoker' | 'negativeJoker' |
   'celestialPack' | 'jokerPack' | 'tarotPack' | 'spectralPack' |
   'bossReroll' | 'orbital';
 
+export type TarotTypes = 'moon'|'star'|'sun'|'world'|  //suit change for 3
+  'magician'|'empress'|'hierophant'|'strength'| //enhance 2
+  'lovers'|'chariot'|'justice'|'devil'|'tower'| //enhance 1
+  'fool'|'highPriestess'|'emperor'|'judgment'|  //create misc
+  'wheelOfFortune'|'hermit'|'temperance'|       //bonus
+  'death'|'hangedMan';                          //morph/destroy (2)
+
+export type PlanetTypes = 'mercury'| 'venus'| 'earth' | 'mars' |
+'jupiter' | 'saturn' | 'neptune' | 'uranus' | 'pluto';
+
+
 //FIXME: May also want a runSeed or similar
 //to handle what shops should carry for each round
 //for instance, which vouchers are still to come.
@@ -94,6 +105,7 @@ export type RunStatus = {
 
   vouchers: VoucherTypes[],
   inventory: string[], //Tarots, Planets, Spectral Cards
+  lastUsed: string, //Tarot or Planet
   handRecord: {},
 }
 

@@ -8,6 +8,7 @@ import {
   dealCards,
   discardCards,
   playCards,
+  finishRound,
   shuffle,
  } from '../helpers/misc';
 import {
@@ -121,6 +122,9 @@ function playRound(deckStatusStart:DeckStatus,
   }
 
 
+  //finish Round
+  //TODO:
+  //let roundResults = finishRound();
 
   return {
     deckStatus: deckStatusStart,
