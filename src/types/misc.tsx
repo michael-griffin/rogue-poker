@@ -81,7 +81,7 @@ export type TarotTypes = 'moon'|'star'|'sun'|'world'|  //suit change for 3
   'lovers'|'chariot'|'justice'|'devil'|'tower'| //enhance 1
   'fool'|'highPriestess'|'emperor'|'judgment'|  //create misc
   'wheelOfFortune'|'hermit'|'temperance'|       //bonus
-  'death'|'hangedMan';                          //morph/destroy (2)
+  'death'|'hangedMan';                          //copy/destroy 2
 
 export type PlanetTypes = 'mercury'| 'venus'| 'earth' | 'mars' |
 'jupiter' | 'saturn' | 'neptune' | 'uranus' | 'pluto';
@@ -105,7 +105,7 @@ export type RunStatus = {
 
   vouchers: VoucherTypes[],
   inventory: string[], //Tarots, Planets, Spectral Cards
-  lastUsed: string, //Tarot or Planet
+  lastUsed: string | null, //Tarot or Planet
   handRecord: {},
 }
 

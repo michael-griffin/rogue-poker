@@ -135,8 +135,8 @@ export function buildDeckStatus(deck: Card[]=[]): DeckStatus {
 }
 
 
-/** Deals numCards from remainingCards, and adds to dealtCards
- *  unselects all cards after new hand is dealt
+/** Deals numCards from remainingCards, and adds to dealtCards.
+ *  Afterwards, unselects all cards and clears played/unplayed.
  *
  *  Note: if there are too few cards remaining, will deal only the remaining,
  *  resulting in a smaller hand.
@@ -152,14 +152,11 @@ export function dealCards(deckStatus:DeckStatus, numCards: number): DeckStatus {
   newStatus['dealtCards'] = [...newStatus['dealtCards'], ...newlyDealt];
   newStatus['remainingCards'] = newRemaining;
   newStatus = unselectAllCards(newStatus);
+  newStatus['unplayedCards'] = [];
+  newStatus['playedCards'] = [];
   return newStatus;
 }
 
-export function unselectAllCards(deckStatus:DeckStatus): DeckStatus {
-  const newStatus = structuredClone(deckStatus);
-  newStatus['selectedCards'] = Array(newStatus['dealtCards'].length).fill(false);
-  return newStatus;
-}
 
 
 function selectToggle(deckStatus:DeckStatus, selectInd: number): DeckStatus {
@@ -170,6 +167,13 @@ function selectToggle(deckStatus:DeckStatus, selectInd: number): DeckStatus {
   if (selectInd > newStatus.selectedCards.length) return newStatus;
 
   newStatus.selectedCards[selectInd] = !newStatus.selectedCards[selectInd];
+  return newStatus;
+}
+
+
+export function unselectAllCards(deckStatus:DeckStatus): DeckStatus {
+  const newStatus = structuredClone(deckStatus);
+  newStatus['selectedCards'] = Array(newStatus['dealtCards'].length).fill(false);
   return newStatus;
 }
 
@@ -218,13 +222,33 @@ export function playCards(deckStatus:DeckStatus): DeckStatus {
 }
 
 
-/** move playedCards to usedCards,
- *  refills hand
- */
-function postPlayCleanup(deckStatus:DeckStatus): DeckStatus {
+/** move playedCards to usedCards, and refills hand.
+ * Dealing cards will clear selected, played, and unplayed. */
+function cleanupPlayed(deckStatus:DeckStatus): DeckStatus {
   const newStatus = structuredClone(deckStatus);
 
-  return newStatus;
+  newStatus['usedCards'] = [...newStatus['playedCards'], ...newStatus['usedCards']];
+
+  let nToDeal = newStatus['playedCards'].length;
+  let refilled = dealCards(newStatus, nToDeal);
+  return refilled;
+}
+
+
+/** rebuilds deck from old cards, shuffles, and returns
+ * a new deck status with buildDeckStatus.
+ * A 'reset' deck has a deck and remainingCards, nothing else. */
+function resetDeck(deckStatus:DeckStatus): DeckStatus {
+  const newStatus = structuredClone(deckStatus);
+
+  const newDeck = [
+    ...newStatus['dealtCards'],
+    ...newStatus['usedCards'],
+    ...newStatus['remainingCards'],
+  ];
+  const shuffledDeck = shuffle(newDeck);
+  let reset = buildDeckStatus(shuffledDeck);
+  return reset;
 }
 
 
@@ -444,6 +468,7 @@ export function buildRunStatus(
 
     vouchers: [],
     inventory: [],
+    lastUsed: null,
     handRecord: buildHandRecord(),
   }
 
