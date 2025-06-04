@@ -10,17 +10,13 @@ import {
   playCards,
   finishRound,
   shuffle,
+  chooseRandom,
  } from '../helpers/misc';
 import {
   DeckStatus,
   RunStatus,
   RoundStatus,
 } from '../types/misc';
-
-//Setup game
-const handBase = 4;
-const discardBase = 3;
-const handSizeBase = 8;
 
 
 let myDeck = buildStartDeck();
@@ -65,14 +61,14 @@ function playGame() {
  */
 function setupStart(difficulty:'normal'|'hard'|'hell'='normal') {
 
-  const baseDeckStatus = buildDeckStatus();
-  const baseRunStatus = buildRunStatus();
-  const baseRoundStatus = buildRoundStatus();
+  const baseDeck = buildDeckStatus();
+  const baseRun = buildRunStatus();
+  const baseRound = buildRoundStatus();
 
   return {
-    deckStatus: baseDeckStatus,
-    runStatus: baseRunStatus,
-    roundStatus: baseRoundStatus,
+    deckStatus: baseDeck,
+    runStatus: baseRun,
+    roundStatus: baseRound,
   }
 }
 
@@ -83,14 +79,14 @@ type RoundInstruction = ['discard'|'play', number[]];
 /**
  *
  */
-function playRound(deckStatusStart:DeckStatus,
-  runStatusStart:RunStatus,
-  roundStatusStart:RoundStatus,
+function playRound(baseDeck:DeckStatus,
+  baseRun:RunStatus,
+  baseRound:RoundStatus,
   instructions:RoundInstruction[]){
 
-  let currentDeck:DeckStatus = structuredClone(deckStatusStart);
-  let currentRun:RunStatus = structuredClone(runStatusStart);
-  let currentRound:RoundStatus = structuredClone(roundStatusStart);
+  let currentDeck:DeckStatus = structuredClone(baseDeck);
+  let currentRun:RunStatus = structuredClone(baseRun);
+  let currentRound:RoundStatus = structuredClone(baseRound);
 
   //increment Round
   currentRun.currentRound = currentRun.currentRound + 1;
@@ -118,19 +114,15 @@ function playRound(deckStatusStart:DeckStatus,
       currentDeck = playCards(currentDeck);
       //score cards
     }
-
+    //TODO: score cards, check if score exceeds goal for round.
   }
 
+  //TODO: handle game over, ideally run/roundStatus should provide info for
+  //game over screen.
 
   //finish Round
-  //TODO:
-  //let roundResults = finishRound();
-
-  return {
-    deckStatus: deckStatusStart,
-    runStatus: runStatusStart,
-    roundStatus: roundStatusStart,
-  }
+  let roundResults = finishRound(currentDeck, currentRun, currentRound);
+  return roundResults; //deckStatus, runStatus, roundStatus
 }
 
 
@@ -153,19 +145,31 @@ function buildRoundInstructions(playOnly=true, len=4, selectSize=5){
 
   return instructions;
 }
-/** choose <count> random indices between 0 and handSize-1 */
-function chooseRandom(count:number){
-  let allIndices = Array(handSizeBase).fill(-1).map((_, ind) => ind);
-  let indices = shuffle(allIndices).slice(0,count);
-  return indices;
+
+
+
+
+
+
+
+//TODO: shopping instructions on how to select, reroll? How to interface
+//with shelves?
+//type ShopInstruction = ??? //FIXME:
+function goShopping(baseDeck:DeckStatus, baseRun:RunStatus, instructions:any[]){
+
+  let currentDeck = structuredClone(baseDeck);
+  let currentRun = structuredClone(baseRun);
+
+  //Stock shop
+
+  //(while loop) buy item or end shopping
+
+  //how to open packs?
+  return {
+    deckStatus: currentDeck,
+    runStatus: currentRun,
+  }
 }
-
-
-
-
-
-
-
 //start round (shuffle deck)
 //draw hand
 //select 1-5 cards (may need to have an order shuffle test here)

@@ -2,12 +2,13 @@
 
 //https://balatrogame.fandom.com/wiki/Tarot_Cards
 
+import {shuffle} from './misc';
 
 import { Tarot,
-  TarotTypes,
   DeckStatus,
   RunStatus,
-  RoundStatus,
+  TarotTypes,
+  TarotFn,
  } from "../types/misc";
 
 // type TarotFunction = ();
@@ -16,6 +17,7 @@ import { Tarot,
  */
 const baseTarot = {
   name: '',
+  cardCount: 0, //how many cards should be selected to use Tarot
   price: 3,
   sellValue: 1,
   description: '',
@@ -26,25 +28,58 @@ const lovers:Tarot = {
   ...baseTarot,
   name: 'lovers',
   description: 'enhances 1 selected card into wildcard',
+  cardCount: 1,
 };
-function loversFn(deckStatusStart:DeckStatus,
-  runStatusStart:RunStatus){
+function loversFn(baseDeck:DeckStatus,
+  baseRun:RunStatus){
+  let status = 'invalid';
 
+  let currentDeck = structuredClone(baseDeck);
+  let currentRun = structuredClone(baseRun);
+
+  //check whether valid selection
+  const selectCount = currentDeck['selectedCards'].reduce((count, selected) => {
+    if (selected) count += 1;
+    return count;
+  }, 0);
+  if (selectCount !== lovers['cardCount']){
+    return {deckStatus: currentDeck, runStatus: currentRun, status};
+  } else {
+    status = 'success';
+  }
+
+  //modify card(s)
+  for (let i = 0; i < currentDeck['dealtCards'].length; i++){
+    if (currentDeck['selectedCards'][i]){
+      currentDeck['dealtCards'][i].enhanced = 'wild';
+    }
+  }
+
+  //unselect all
+  currentDeck['selectedCards'] = Array(currentDeck['dealtCards'].length).fill(false);
+
+  return {
+    runStatus: currentRun,
+    deckStatus: currentDeck,
+    status,
+  }
 }
+
+
 
 const hangedMan:Tarot = {
   name:'hangedMan',
+  cardCount: 2,
   price: 3,
   sellValue: 1,
   description: 'destroys up to 2 selected cards',
 }
-
 function hangedManFn(
-  deckStatusStart:DeckStatus,
-  runStatusStart:RunStatus
+  baseDeck:DeckStatus,
+  baseRun:RunStatus
 ){
-  let currentDeck = structuredClone(deckStatusStart);
-  let currentRun = structuredClone(runStatusStart);
+  let currentDeck = structuredClone(baseDeck);
+  let currentRun = structuredClone(baseRun);
   let status = 'invalid';
 
   //Check if tarot can be used
@@ -59,21 +94,23 @@ function hangedManFn(
   currentDeck['dealtCards'] = currentDeck['dealtCards'].filter((_, ind) => {
     return !currentDeck['selectedCards'][ind];
   });
+  currentDeck['selectedCards'] = Array(currentDeck['dealtCards'].length).fill(false);
 
+  status = 'success';
   return {
-    currentDeck,
-    currentRun,
-    status
+    deckStatus: currentDeck,
+    runStatus: currentRun,
+    status,
   }
 }
 
 
 
 type AllTarotFunctions = {
-  [key: string]: Function,
+  [key: string]: TarotFn,
 }
 export const allTarotFunctions: AllTarotFunctions = {
-
+  lovers: loversFn,
 }
 
 type Tarots = {
@@ -83,4 +120,10 @@ export const allTarots:Tarots = {
   lovers,
 }
 
-export const allTarotsList = Object.values(allTarots);
+export const allTarotsList:Tarot[] = Object.values(allTarots);
+
+export function dealTarots(num: number): Tarot[] {
+  let shuffled = shuffle(allTarotsList);
+  let dealt = shuffled.slice(0, num);
+  return dealt;
+}

@@ -36,10 +36,18 @@ export type Joker = {
 
 export type Tarot = {
   name: string,
+  cardCount: number, //0, 1, 2, 3
   price: number,
   sellValue: number,
   description: string
 }
+
+type TarotFnResult = {
+  deckStatus: DeckStatus,
+  runStatus: RunStatus,
+  status: string,
+}
+export type TarotFn = (baseDeck:DeckStatus, baseRun:RunStatus) => TarotFnResult;
 
 export type Planet = {
   name: string,

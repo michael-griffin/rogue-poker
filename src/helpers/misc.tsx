@@ -22,7 +22,7 @@ import { allJokerFunctions,
   uncommonJokers} from "./jokers";
 import {baseHandSize, rankNames, chipValues, shopInfo, allVouchers,
   scoreGoals, baseScores, levelUps} from './constants';
-import { allTarotsList } from './tarots';
+import { allTarotFunctions, allTarotsList, dealTarots } from './tarots';
 import { allPlanetsList } from './planets';
 
 
@@ -158,6 +158,12 @@ export function dealCards(deckStatus:DeckStatus, numCards: number): DeckStatus {
 }
 
 
+export function unselectAllCards(deckStatus:DeckStatus): DeckStatus {
+  const newStatus = structuredClone(deckStatus);
+  newStatus['selectedCards'] = Array(newStatus['dealtCards'].length).fill(false);
+  return newStatus;
+}
+
 
 function selectToggle(deckStatus:DeckStatus, selectInd: number): DeckStatus {
   let newStatus = structuredClone(deckStatus);
@@ -167,13 +173,6 @@ function selectToggle(deckStatus:DeckStatus, selectInd: number): DeckStatus {
   if (selectInd > newStatus.selectedCards.length) return newStatus;
 
   newStatus.selectedCards[selectInd] = !newStatus.selectedCards[selectInd];
-  return newStatus;
-}
-
-
-export function unselectAllCards(deckStatus:DeckStatus): DeckStatus {
-  const newStatus = structuredClone(deckStatus);
-  newStatus['selectedCards'] = Array(newStatus['dealtCards'].length).fill(false);
   return newStatus;
 }
 
@@ -260,6 +259,9 @@ export function finishRound(deckStatusStart:DeckStatus,
   let currentRun:RunStatus = structuredClone(runStatusStart);
   let currentRound:RoundStatus = structuredClone(roundStatusStart);
 
+  //reset deck
+  let cleanDeck = resetDeck(currentDeck);
+
   const jokerFns = findActiveJokers(currentRun['jokers'], 'roundEnd');
   //update egg, destroy banana, cash in from cloud9/rocket ship.
 
@@ -275,7 +277,7 @@ export function finishRound(deckStatusStart:DeckStatus,
 
 
   return {
-    deckStatus: currentDeck,
+    deckStatus: cleanDeck,
     runStatus: currentRun,
     roundStatus: cleanRoundStats,
   }
@@ -386,6 +388,76 @@ function buildPackVariations(){
 // function buyItem(stock, category:'shelf'|'voucher'|'pack', ind=0){
 
 // }
+
+function openPack(pack:Pack, baseDeck:DeckStatus, baseRun:RunStatus){
+
+  let currentDeck = structuredClone(baseDeck);
+  let currentRun = structuredClone(baseRun);
+
+  let {packType} = pack;
+  let result;
+  if (packType === 'planet'){
+    result = openPlanetPack(currentRun);
+    currentRun = result['runStatus'];
+  } else if (packType === 'tarot'){
+    result = openTarotPack(pack, currentDeck, currentRun);
+    currentDeck = result['deckStatus'];
+    currentRun = result['runStatus'];
+  }
+
+  return {
+    deckStatus: currentDeck,
+    runStatus: currentRun,
+  }
+}
+
+// function openCardPack(){
+
+// }
+
+
+function openPlanetPack(baseRun:RunStatus){
+  let currentRun = structuredClone(baseRun);
+
+  return {
+    runStatus: currentRun,
+  }
+}
+
+
+function openTarotPack(pack:Pack, deckStatusStart:DeckStatus,
+  runStatusStart:RunStatus){
+  let {size:sizeName, packType} = pack;
+  if (packType !== 'tarot') throw new Error('incorrect pack passed');
+
+  let packSizes = {'normal': 4, 'jumbo': 5, 'mega': 6};
+  let packSize = packSizes[sizeName];
+
+  let currentDeck:DeckStatus = structuredClone(deckStatusStart);
+  let currentRun:RunStatus = structuredClone(runStatusStart);
+
+  let dealtTarots = dealTarots(packSize);
+  let selectedTarot = Array(packSize).fill(false);
+
+  //select tarot
+  let tarotChoices = chooseRandom(1, dealtTarots.length);
+  let tarotChoice = dealtTarots[tarotChoices[0]];
+  let selectCount = tarotChoice.cardCount;
+
+  //select cards
+  currentDeck = dealCards(currentDeck, baseHandSize);
+  let cardChoices = chooseRandom(selectCount, currentDeck['dealtCards'].length);
+  currentDeck = selectCards(currentDeck, cardChoices);
+
+  //use Tarot
+  const tarotFn = allTarotFunctions[tarotChoice['name']];
+  let tarotResult = tarotFn(currentDeck, currentRun);
+
+  return {
+    deckStatus: tarotResult['deckStatus'],
+    runStatus: tarotResult['runStatus'],
+  }
+}
 
 
 export function buildStartDeck(): Card[] {
@@ -520,4 +592,13 @@ export function shuffle(base:any[]) {
       arr[j] = temp;
   }
   return base;
+}
+
+
+/** Returns an array with [count] random indices.
+ * Indices are between 0 and maxSize, exclusive*/
+export function chooseRandom(count:number, maxSize:number=baseHandSize){
+  let allIndices = Array(maxSize).fill(-1).map((_, ind) => ind);
+  let indices = shuffle(allIndices).slice(0,count);
+  return indices;
 }
