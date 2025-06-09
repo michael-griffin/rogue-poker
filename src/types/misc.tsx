@@ -136,7 +136,41 @@ export type DeckStatus = {
   usedCards: Card[], //discarded or played
   remainingCards: Card[], //deck remaining
 }
+export type CardDeck = {
+  deck: Card[],
+  dealtCards: Card[], //handSize active cards, can be played or discarded.
+  selectedCards: boolean[],
+  playedCards: Card[],
+  unplayedCards: Card[],
+  usedCards: Card[], //discarded or played
+  remainingCards: Card[], //deck remaining
+}
 
+
+export type TarotDeck = {
+  deck: Tarot[],
+  dealtCards: Tarot[],
+  selectedCards: boolean[],
+}
+
+export type PlanetDeck = {
+  deck: Planet[],
+  dealtCards: Planet[],
+  selectedCards: boolean[],
+}
+
+export type ShelfItem = {category: string, item:Joker|Card|Tarot|Planet};
+function buildStock(){
+  const shelf:ShelfItem[] = [];
+  const voucher:VoucherTypes[] = [];
+  const pack:Pack[] = [];
+  return {shelf, voucher, pack};
+}
+export type ShopStock = {
+  shelf: ShelfItem[],
+  vouchers: VoucherTypes[],
+  packs: Pack[],
+}
 
 export type HandTypes = 'highCard' | 'pair' | 'threeOf' | 'fourOf' |
   'fiveOf' | 'flushFive' | 'twoPair' | 'fullHouse' | 'flushHouse' |

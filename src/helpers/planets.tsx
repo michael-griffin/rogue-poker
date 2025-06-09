@@ -2,7 +2,8 @@
 
 //https://balatrogame.fandom.com/wiki/Tarot_Cards
 
-import { HandRecord, HandTypes, Planet } from "../types/misc";
+import { HandRecord, HandTypes, Planet, PlanetTypes, PlanetDeck } from "../types/misc";
+import { shuffle } from "./misc";
 
 export function levelUpHand(handRecord:HandRecord, handType:HandTypes){
   const updatedRecord = structuredClone(handRecord);
@@ -65,3 +66,30 @@ export const allPlanets:Planets = {
 }
 
 export const allPlanetsList = Object.values(allPlanets);
+
+export function dealPlanets(baseDeck:PlanetDeck, num: number): PlanetDeck {
+  let currentDeck = structuredClone(baseDeck);
+
+  let shuffled = shuffle(currentDeck['deck']);
+  let dealtCards = shuffled.slice(0, num);
+  let selectedCards = Array(dealtCards.length).fill(false);
+
+  currentDeck['dealtCards'] = dealtCards;
+  currentDeck['selectedCards'] = selectedCards;
+
+  return currentDeck;
+}
+
+
+
+
+export function buildPlanetDeck():PlanetDeck {
+  let planetDeck:PlanetDeck = {
+    deck: [],
+    dealtCards: [],
+    selectedCards: [],
+  };
+
+  planetDeck['deck'] = structuredClone(allPlanetsList);
+  return planetDeck;
+}
