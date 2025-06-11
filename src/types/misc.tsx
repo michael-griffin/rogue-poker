@@ -1,7 +1,7 @@
 export type RankNum = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
 export type RankName = 'ace' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' |
  '10' | 'jack' | 'queen' | 'king';
-export type Suit = 'clubs' | 'diamonds' | 'hearts' | 'spades';
+export type Suit = 'hearts' | 'diamonds' | 'spades' | 'clubs';
 export type CardType = 'ace' | 'face' | 'number' ; //stone;
 export type Enhancement = "bonus" | "mult" | "wild" | "glass" | "steel" |
   "stone" | "gold" | "lucky";
@@ -35,14 +35,14 @@ export type Joker = {
 }
 
 export type Tarot = {
-  name: string,
+  name: TarotTypes,
   cardCount: number, //0, 1, 2, 3
   price: number,
   sellValue: number,
   description: string
 }
 
-type TarotFnResult = {
+export type TarotFnResult = {
   deckStatus: DeckStatus,
   runStatus: RunStatus,
   status: string,
@@ -50,7 +50,7 @@ type TarotFnResult = {
 export type TarotFn = (baseDeck:DeckStatus, baseRun:RunStatus) => TarotFnResult;
 
 export type Planet = {
-  name: string,
+  name: PlanetTypes,
   chip: number,
   mult: number,
   price: number,
@@ -196,6 +196,7 @@ export type VoucherTypes = 'blank' | 'bossReroll' | 'clearance' | 'consumable' |
 export type Pack = {
   packType: 'planet'|'tarot',
   size: 'normal'|'jumbo'|'mega',
+  cardCount: 4|5|6,
   version: 1|2,
 };
 

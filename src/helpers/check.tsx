@@ -10,7 +10,7 @@ import {
   HandTypes,
   HandStatus,
 } from '../types/misc'
-import {getRankInfo} from './misc';
+import {getRankInfo} from './cards/cards';
 
 /**
  * Basic structure:

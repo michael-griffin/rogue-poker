@@ -109,3 +109,8 @@ export const chipValues = {
   13: 10
 };
 
+export const packSizes = {
+  'normal': 4,
+  'jumbo': 5,
+  'mega': 6,
+}

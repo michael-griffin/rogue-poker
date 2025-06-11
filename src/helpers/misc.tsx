@@ -9,255 +9,44 @@ import {
   Card,
   Joker,
   Tarot,
+  TarotDeck,
   Planet,
+  PlanetDeck,
   Pack,
   VoucherTypes,
   DeckStatus,
   RunStatus,
   RoundStatus,
+  ShelfItem,
+  ShopStock,
+  HandRecord,
+  CardDeck,
+  TarotFnResult,
 } from '../types/misc'
-
-import { allJokerFunctions,
-  commonJokersList, uncommonJokersList, rareJokersList,
-  uncommonJokers} from "./jokers";
 import {baseHandSize, rankNames, chipValues, shopInfo, allVouchers,
   scoreGoals, baseScores, levelUps} from './constants';
-import { allTarotFunctions, allTarotsList, dealTarots } from './tarots';
-import { allPlanetsList } from './planets';
 
 
-//type RankNum = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13;
-type RankInfo = {
-  rank: RankNum,
-  name: string,
-  chip: number,
-  cardType: CardType,
-}
+import { resetDeck } from './cards/cards';
 
-export function getRankInfo(rank: RankNum): RankInfo {
-  let cardType: CardType;
-  if (rank === 1){
-    cardType = 'ace';
-  } else if (rank > 10){
-    cardType = 'face';
-  } else {
-    cardType = 'number';
-  }
-
-  let rankInfo = {
-    rank: rank,
-    name: rankNames[rank],
-    chip: chipValues[rank],
-    cardType: cardType,
-  }
-  return rankInfo;
-}
+import { allTarotFunctions, allTarotsList, dealTarots } from './cards/tarots';
+import { allPlanetsList, dealPlanets, levelUpHand } from './cards/planets';
+import { allJokerFunctions, findActiveJokers,
+  commonJokersList, uncommonJokersList, rareJokersList,
+  uncommonJokers} from "./cards/jokers";
 
 
-export function makeCard(rank: RankNum, suit:Suit): Card {
-  const rankInfo = getRankInfo(rank);
-  const name = rankInfo['name'] as RankName;
-  const chip = rankInfo['chip'] as number;
-  const cardType = rankInfo['cardType'] as CardType;
-
-  const card = {
-    suit,
-    rank,
-    name,
-    cardType,
-    chip,
-    enhanced: null,
-    special: null,
-    seal: null,
-  }
-  return card;
-}
 
 
-/** Enhance a card. Updates enhancement, special, or seal property,
- * while leaving other existing properties alone.*/
-/*
-type EnhanceCardParams = {
-  card: Card,
-  enhanced: Enhancement | null,
-  special: SpecialCardMod | null,
-  seal: Seal | null,
-}
-*/
-export function enhanceCard(
-  card: Card,
-  enhanced=null as Enhancement | null,
-  special=null as SpecialCardMod | null,
-  seal=null as Seal | null
-): Card {
-
-  if (enhanced !== null) card['enhanced'] = enhanced;
-  if (special !== null) card['special'] = special;
-  if (seal !== null) card['seal'] = seal;
-
-  return card;
-}
 
 
-// export function getCardValue(card: Card){
-//   let cardValue = {
-//     chip: 0,
-//     mult: 0,
-//     multTimes: 0,
-//   };
+export function finishRound(baseDeck:DeckStatus,
+  baseRun:RunStatus,
+  baseRound:RoundStatus) {
 
-//   cardValue['chip'] = card.chip;
-//   if (card.enhanced === 'bonus') cardValue['chip'] += 30;
-//   if (card.enhanced === 'stone') cardValue['chip'] = 50;
-
-//   if (card.enhan)
-//   return {
-
-//   }
-// }
-
-export function buildDeckStatus(deck: Card[]=[]): DeckStatus {
-  if (deck.length === 0){
-    deck = buildStartDeck();
-  }
-
-  const deckStatusTemplate = {
-    deck: structuredClone(deck), //when moving to react, need to avoid mutating.
-    dealtCards: [], //handSize active cards, can be played or discarded.
-    selectedCards: [],
-    playedCards: [],
-    unplayedCards: [],
-    usedCards: [], //discarded or played
-    remainingCards: structuredClone(deck), //deck remaining
-  }
-
-  return deckStatusTemplate;
-}
-
-
-/** Deals numCards from remainingCards, and adds to dealtCards.
- *  Afterwards, unselects all cards and clears played/unplayed.
- *
- *  Note: if there are too few cards remaining, will deal only the remaining,
- *  resulting in a smaller hand.
- */
-export function dealCards(deckStatus:DeckStatus, numCards: number): DeckStatus {
-  let newStatus = structuredClone(deckStatus);
-
-  //JS handles case of too little remaining automatically:
-  //slice will return a smaller/empty array if insufficient cards to deal.
-  const newlyDealt = newStatus.remainingCards.slice(0, numCards);
-  const newRemaining = newStatus.remainingCards.slice(numCards);
-
-  newStatus['dealtCards'] = [...newStatus['dealtCards'], ...newlyDealt];
-  newStatus['remainingCards'] = newRemaining;
-  newStatus = unselectAllCards(newStatus);
-  newStatus['unplayedCards'] = [];
-  newStatus['playedCards'] = [];
-  return newStatus;
-}
-
-
-export function unselectAllCards(deckStatus:DeckStatus): DeckStatus {
-  const newStatus = structuredClone(deckStatus);
-  newStatus['selectedCards'] = Array(newStatus['dealtCards'].length).fill(false);
-  return newStatus;
-}
-
-
-function selectToggle(deckStatus:DeckStatus, selectInd: number): DeckStatus {
-  let newStatus = structuredClone(deckStatus);
-  if (newStatus.selectedCards.length === 0) {
-    newStatus.selectedCards = Array(newStatus.dealtCards.length).fill(false);
-  }
-  if (selectInd > newStatus.selectedCards.length) return newStatus;
-
-  newStatus.selectedCards[selectInd] = !newStatus.selectedCards[selectInd];
-  return newStatus;
-}
-
-
-export function selectCards(deckStatus:DeckStatus, indices: number[]): DeckStatus {
-  let newStatus = structuredClone(deckStatus);
-  for (let ind of indices){
-    newStatus = selectToggle(newStatus, ind);
-  }
-
-  return newStatus;
-}
-
-
-/** move selectedCards to usedCards
- * deal selectedCard.length new cards from remaining
- */
-export function discardCards(deckStatus: DeckStatus): DeckStatus {
-  const newStatus = structuredClone(deckStatus);
-  const {dealtCards, selectedCards} = deckStatus;
-  const discarded = dealtCards.filter((_, ind) => selectedCards[ind]);
-  const leftover = dealtCards.filter((_, ind) => !selectedCards[ind]);
-  newStatus['usedCards'] = [...discarded, ...newStatus['usedCards']];
-  newStatus['dealtCards'] = leftover;
-
-  let nToDeal = discarded.length;
-  let refilled = dealCards(newStatus, nToDeal); //also unselects
-  return refilled;
-}
-
-
-/** Moves selectedCards to playedCards, copies unselected to unplayedCards,
- *  and removes playedCards from dealtCards
- */
-export function playCards(deckStatus:DeckStatus): DeckStatus {
-  const newStatus = structuredClone(deckStatus);
-  const {dealtCards, selectedCards} = deckStatus;
-  const playedCards = dealtCards.filter((_, ind) => selectedCards[ind]);
-  const unplayedCards = dealtCards.filter((_, ind) => !selectedCards[ind]);
-
-  newStatus.playedCards = playedCards;
-  newStatus.unplayedCards = unplayedCards;
-  newStatus.dealtCards = unplayedCards;
-
-  return newStatus;
-}
-
-
-/** move playedCards to usedCards, and refills hand.
- * Dealing cards will clear selected, played, and unplayed. */
-function cleanupPlayed(deckStatus:DeckStatus): DeckStatus {
-  const newStatus = structuredClone(deckStatus);
-
-  newStatus['usedCards'] = [...newStatus['playedCards'], ...newStatus['usedCards']];
-
-  let nToDeal = newStatus['playedCards'].length;
-  let refilled = dealCards(newStatus, nToDeal);
-  return refilled;
-}
-
-
-/** rebuilds deck from old cards, shuffles, and returns
- * a new deck status with buildDeckStatus.
- * A 'reset' deck has a deck and remainingCards, nothing else. */
-function resetDeck(deckStatus:DeckStatus): DeckStatus {
-  const newStatus = structuredClone(deckStatus);
-
-  const newDeck = [
-    ...newStatus['dealtCards'],
-    ...newStatus['usedCards'],
-    ...newStatus['remainingCards'],
-  ];
-  const shuffledDeck = shuffle(newDeck);
-  let reset = buildDeckStatus(shuffledDeck);
-  return reset;
-}
-
-
-export function finishRound(deckStatusStart:DeckStatus,
-  runStatusStart:RunStatus,
-  roundStatusStart:RoundStatus) {
-
-  let currentDeck:DeckStatus = structuredClone(deckStatusStart);
-  let currentRun:RunStatus = structuredClone(runStatusStart);
-  let currentRound:RoundStatus = structuredClone(roundStatusStart);
+  let currentDeck:DeckStatus = structuredClone(baseDeck);
+  let currentRun:RunStatus = structuredClone(baseRun);
+  let currentRound:RoundStatus = structuredClone(baseRound);
 
   //reset deck
   let cleanDeck = resetDeck(currentDeck);
@@ -294,14 +83,14 @@ function stockShop(runStatus:RunStatus){
   let ownedVouchers = runStatus['vouchers'];
   possVouchers = possVouchers.filter(voucher => !ownedVouchers.includes(voucher));
   possVouchers = shuffle(possVouchers);
-  newStock['voucher'].push(possVouchers[0]);
+  newStock['vouchers'].push(possVouchers[0]);
 
 
   //add packs
   let possPacks = buildPackVariations();
   possPacks = shuffle(possPacks);
-  newStock['pack'].push(possPacks[0]);
-  newStock['pack'].push(possPacks[1]);
+  newStock['packs'].push(possPacks[0]);
+  newStock['packs'].push(possPacks[1]);
 
   return newStock;
 }
@@ -310,13 +99,16 @@ function stockShop(runStatus:RunStatus){
 //   'voucher': [VoucherTypes],
 //   'pack': [{packType: planet|tarot, size:]
 // }
-type ShelfItem = {category: string, item:Joker|Card|Tarot|Planet};
-function buildStock(){
+// type ShelfItem = {category: string, item:Joker|Card|Tarot|Planet};
+function buildStock(): ShopStock {
+
   const shelf:ShelfItem[] = [];
-  const voucher:VoucherTypes[] = [];
-  const pack:Pack[] = [];
-  return {shelf, voucher, pack};
+  const vouchers:VoucherTypes[] = [];
+  const packs:Pack[] = [];
+  let newStock:ShopStock = {shelf, vouchers, packs};
+  return newStock;
 }
+
 //TODO: currently missing special edition implementation.
 function restockShelf(){
   let newShelf:ShelfItem[] = [];
@@ -372,12 +164,14 @@ function buildPackVariations(){
   let packs:Pack[] = [];
   let packTypes = ['planet', 'tarot'];
   let sizes = ['normal', 'jumbo', 'mega'];
+  let cardCounts = {'normal': 4, 'jumbo': 5, 'mega': 6};
   let versions = [1, 2];
 
   for (let packType of packTypes){
     for (let size of sizes){
+      let cardCount = cardCounts[size as 'normal'|'jumbo'|'mega'];
       for (let version of versions){
-        let newPack = {packType, size, version} as Pack;
+        let newPack = {packType, size, cardCount, version} as Pack;
         packs.push(newPack);
       }
     }
@@ -389,20 +183,54 @@ function buildPackVariations(){
 
 // }
 
-function openPack(pack:Pack, baseDeck:DeckStatus, baseRun:RunStatus){
+/**
+ * Opens pack,
+ * selects appropriate tarot/playing/planet cards.
+ *
+ * Should have a parameter to switch select instructions between auto/manual.
+ * @param pack
+ * @param baseDeck
+ * @param baseRun
+ * @returns
+ */
+function usePack(pack:Pack, baseDeck:DeckStatus, baseRun:RunStatus,
+  selectInstructions='simple'){
 
   let currentDeck = structuredClone(baseDeck);
   let currentRun = structuredClone(baseRun);
 
-  let {packType} = pack;
+  let {packType, cardCount} = pack;
+
   let result;
   if (packType === 'planet'){
-    result = openPlanetPack(currentRun);
-    currentRun = result['runStatus'];
+    const planetDeck = openPlanetPack(pack);
+
+    //select planet
+
+    //call function to return new handRecord
+    //update runStatus with new handRecord
+
   } else if (packType === 'tarot'){
-    result = openTarotPack(pack, currentDeck, currentRun);
-    currentDeck = result['deckStatus'];
-    currentRun = result['runStatus'];
+    let tarotDeck = openTarotPack(pack) as TarotDeck;
+
+    //select tarot
+    let tarotInd:number[] = handleSelection(selectInstructions, 1, cardCount);
+
+
+
+    tarotDeck = selectTarots(tarotDeck, tarotInd);
+    let tarotChosen = tarotDeck['dealtCards'][tarotInd[0]];
+    const cardsNeeded = tarotChosen['cardCount'];
+    //select cards
+    let cardInd = handleSelection(selectInstructions,
+      cardsNeeded, currentRun['handSize']);
+
+    currentDeck = selectCards(currentDeck, cardInd);
+
+    //call tarot function that updates cardDeck or runStatus
+
+    // currentDeck = result['deckStatus'];
+    // currentRun = result['runStatus'];
   }
 
   return {
@@ -416,108 +244,105 @@ function openPack(pack:Pack, baseDeck:DeckStatus, baseRun:RunStatus){
 // }
 
 
-function openPlanetPack(baseRun:RunStatus){
-  let currentRun = structuredClone(baseRun);
+function openPlanetPack(pack:Pack){
+  let {cardCount, packType} = pack;
+  if (packType !== 'planet') throw new Error('incorrect pack passed');
 
-  return {
-    runStatus: currentRun,
-  }
+  const planetDeck = dealPlanets(cardCount);
+  return planetDeck;
 }
 
+/** expects a planetDeck with dealt + selected prefilled, and a runStatus.
+ * returns a new runStatus, with handRecord updated.
+ */
+function usePlanet(planetDeck:PlanetDeck, baseRun:RunStatus){
+  let newRun = structuredClone(baseRun);
 
-function openTarotPack(pack:Pack, deckStatusStart:DeckStatus,
-  runStatusStart:RunStatus){
-  let {size:sizeName, packType} = pack;
+  const selection = planetDeck['dealtCards'].filter((_, ind) => {
+    return planetDeck.selectedCards[ind];
+  });
+  if (selection.length != 1) throw new Error('invalid planet selection');
+
+  const handToLevel = selection[0].handType;
+  let newHandRecord = levelUpHand(baseRun['handRecord'] as HandRecord, handToLevel);
+  newRun['handRecord'] = newHandRecord;
+
+  return newRun;
+}
+
+/** Creates a tarot deck, deals cards matching packSize, and builds an empty
+ * selectCards array */
+function openTarotPack(pack:Pack){
+  let {cardCount, packType} = pack;
   if (packType !== 'tarot') throw new Error('incorrect pack passed');
 
-  let packSizes = {'normal': 4, 'jumbo': 5, 'mega': 6};
-  let packSize = packSizes[sizeName];
-
-  let currentDeck:DeckStatus = structuredClone(deckStatusStart);
-  let currentRun:RunStatus = structuredClone(runStatusStart);
-
-  let dealtTarots = dealTarots(packSize);
-  let selectedTarot = Array(packSize).fill(false);
-
-  //select tarot
-  let tarotChoices = chooseRandom(1, dealtTarots.length);
-  let tarotChoice = dealtTarots[tarotChoices[0]];
-  let selectCount = tarotChoice.cardCount;
-
-  //select cards
-  currentDeck = dealCards(currentDeck, baseHandSize);
-  let cardChoices = chooseRandom(selectCount, currentDeck['dealtCards'].length);
-  currentDeck = selectCards(currentDeck, cardChoices);
-
-  //use Tarot
-  const tarotFn = allTarotFunctions[tarotChoice['name']];
-  let tarotResult = tarotFn(currentDeck, currentRun);
-
-  return {
-    deckStatus: tarotResult['deckStatus'],
-    runStatus: tarotResult['runStatus'],
-  }
+  const tarotDeck = dealTarots(cardCount); //deals tarot cards, sets up select
+  return tarotDeck;
 }
 
 
-export function buildStartDeck(): Card[] {
-  const ranks = Array(13).fill(0).map((_, ind) => ind+1) as RankNum[];
-  const suits: Suit[] = ['hearts', 'diamonds', 'spades', 'clubs'];
-
-  let newDeck = [];
-  for (let suit of suits) {
-    for (let rank of ranks){
-      let newCard = makeCard(rank, suit);
-      newDeck.push(newCard);
-    }
-  }
-  return newDeck;
-}
-
-
-export function buildSimpleDeck(): Card[]{
-  const ranks = Array(5).fill(0).map((_, ind) => ind+1) as RankNum[];
-  const suits: Suit[] = ['hearts', 'diamonds', 'spades', 'clubs'];
-
-  let newDeck = [];
-  for (let suit of suits) {
-    for (let rank of ranks){
-      let newCard = makeCard(rank, suit);
-      newDeck.push(newCard);
-    }
-  }
-  return newDeck;
-}
-
-
-export function findCards(deck:Card[], searchType:'suit'|'rank', match:Suit|RankNum){
-  let foundCards: Card[] = [];
-  if (searchType === 'suit'){
-    foundCards = deck.filter(card => {
-      if (card.suit === match) return true;
-    });
-  } else if (searchType === 'rank'){
-    foundCards = deck.filter(card => {
-      if (card.rank === match) return true;
-    });
-  }
-  return foundCards;
-}
-
-
-/** Finds jokers that match the current phase of play, and returns their functions
- * activePhased could be scorePlayed, scoreJokers, or others...
+/** Inputs: a tarotDeck with 1 selection made, a cardDeck with
+ * cards selected for the tarot to modify (see tarot['cardCount'])
+ * and runStatus.
+ * Finds the selected tarot + its function, then calls that function
+ * with cardDeck + runStatus to modify both.
  */
-export function findActiveJokers(jokers:Joker[], activePhase:string){
-  const jokerFns = [];
-  for (let joker of jokers){
-    let jokerName = '';
-    if (joker['activePhase'] === activePhase) jokerName = joker['name'];
-    if (jokerName) jokerFns.push(allJokerFunctions[jokerName]);
-  }
+function useTarot(
+  tarotDeck:TarotDeck,
+  baseDeck:CardDeck,
+  baseRun:RunStatus
+): TarotFnResult {
+  let currentDeck = structuredClone(baseDeck);
+  let currentRun = structuredClone(baseRun);
 
-  return jokerFns;
+  const selection = tarotDeck['dealtCards'].filter((_, ind) => {
+    return tarotDeck.selectedCards[ind];
+  });
+  if (selection.length != 1) throw new Error('invalid tarot selection');
+
+  //TODO: may be worth checking if currentDeck has card
+  //selections in place prior to tarotFn call.
+
+  const tarotName = selection[0]['name'];
+  const tarotFn = allTarotFunctions[tarotName];
+  let tarotResult = tarotFn(currentDeck, currentRun);
+  return tarotResult;
 }
+// function openTarotPack(pack:Pack, baseDeck:DeckStatus,
+//   baseRun:RunStatus){
+//   let {size:sizeName, packType} = pack;
+//   if (packType !== 'tarot') throw new Error('incorrect pack passed');
+
+//   let packSizes = {'normal': 4, 'jumbo': 5, 'mega': 6};
+//   let packSize = packSizes[sizeName];
+
+//   let currentDeck:DeckStatus = structuredClone(baseDeck);
+//   let currentRun:RunStatus = structuredClone(baseRun);
+
+//   let dealtTarots = dealTarots(packSize);
+//   let selectedTarot = Array(packSize).fill(false);
+
+//   //select tarot
+//   let tarotChoices = chooseRandom(1, dealtTarots.length);
+//   let tarotChoice = dealtTarots[tarotChoices[0]];
+//   let selectCount = tarotChoice.cardCount;
+
+//   //select cards
+//   currentDeck = dealCards(currentDeck, baseHandSize);
+//   let cardChoices = chooseRandom(selectCount, currentDeck['dealtCards'].length);
+//   currentDeck = selectCards(currentDeck, cardChoices);
+
+//   //use Tarot
+//   const tarotFn = allTarotFunctions[tarotChoice['name']];
+//   let tarotResult = tarotFn(currentDeck, currentRun);
+
+//   return {
+//     deckStatus: tarotResult['deckStatus'],
+//     runStatus: tarotResult['runStatus'],
+//   }
+// }
+
+
 
 
 export function buildRunStatus(
@@ -582,6 +407,35 @@ export function buildHandRecord(){
   return handRecord;
 }
 
+
+export function handleSelection(instructions='simple', count=1, maxSize=baseHandSize){
+  let selectInds:number[]=[];
+  if (instructions === 'simple'){
+    selectInds = chooseSimple(count, maxSize);
+  } else if (instructions === 'random'){
+    selectInds = chooseSimple(count, maxSize);
+  } else if (instructions === 'manual'){
+
+  }
+
+  return selectInds;
+}
+/** Returns an array with [count] random indices.
+ * Indices are between 0 and maxSize, exclusive*/
+export function chooseRandom(count:number, maxSize:number=baseHandSize){
+  let allIndices = Array(maxSize).fill(-1).map((_, ind) => ind);
+  let indices = shuffle(allIndices).slice(0,count);
+  return indices;
+}
+/** Returns an array with [count] indices, counting up from 0.*/
+export function chooseSimple(count:number, maxSize:number=baseHandSize){
+  let allIndices = Array(maxSize).fill(-1).map((_, ind) => ind);
+  let indices = allIndices.slice(0, count);
+  return indices;
+}
+
+
+
 /** Given an array, returns a new array with shuffled contents */
 export function shuffle(base:any[]) {
   let arr = structuredClone(base);
@@ -592,13 +446,4 @@ export function shuffle(base:any[]) {
       arr[j] = temp;
   }
   return base;
-}
-
-
-/** Returns an array with [count] random indices.
- * Indices are between 0 and maxSize, exclusive*/
-export function chooseRandom(count:number, maxSize:number=baseHandSize){
-  let allIndices = Array(maxSize).fill(-1).map((_, ind) => ind);
-  let indices = shuffle(allIndices).slice(0,count);
-  return indices;
 }

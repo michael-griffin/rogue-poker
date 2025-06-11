@@ -1,5 +1,5 @@
 //A collection of jokers.
-import {Joker, Card, HandStatus} from "../types/misc.tsx";
+import {Joker, Card, HandStatus} from "../../types/misc.tsx";
 //Jokers
 /*
 export type Joker = {
@@ -14,10 +14,19 @@ export type Joker = {
 */
 
 
-//activePhases:
-//roundStart(blindSelect), playStart, discard??,
-// scorePlayed, scoreJokers, roundEnd
+/** Finds jokers that match the current phase of play, and returns their functions
+ * activePhased could be scorePlayed, scoreJokers, or others...
+ */
+export function findActiveJokers(jokers:Joker[], activePhase:string){
+  const jokerFns = [];
+  for (let joker of jokers){
+    let jokerName = '';
+    if (joker['activePhase'] === activePhase) jokerName = joker['name'];
+    if (jokerName) jokerFns.push(allJokerFunctions[jokerName]);
+  }
 
+  return jokerFns;
+}
 
 
 /*******************/

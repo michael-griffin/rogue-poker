@@ -2,14 +2,17 @@
 
 //https://balatrogame.fandom.com/wiki/Tarot_Cards
 
-import {shuffle} from './misc';
+import {shuffle} from '../misc';
 
 import { Tarot,
+  TarotDeck,
   DeckStatus,
   RunStatus,
-  TarotTypes,
   TarotFn,
- } from "../types/misc";
+  TarotFnResult,
+} from "../../types/misc";
+
+import { selectCards, unselectAllCards } from './cards';
 
 // type TarotFunction = ();
 /** Tarot Functions require a deck status (to see dealt/selected cards)
@@ -31,7 +34,7 @@ const lovers:Tarot = {
   cardCount: 1,
 };
 function loversFn(baseDeck:DeckStatus,
-  baseRun:RunStatus){
+  baseRun:RunStatus):TarotFnResult {
   let status = 'invalid';
 
   let currentDeck = structuredClone(baseDeck);
@@ -77,7 +80,7 @@ const hangedMan:Tarot = {
 function hangedManFn(
   baseDeck:DeckStatus,
   baseRun:RunStatus
-){
+):TarotFnResult {
   let currentDeck = structuredClone(baseDeck);
   let currentRun = structuredClone(baseRun);
   let status = 'invalid';
@@ -122,8 +125,40 @@ export const allTarots:Tarots = {
 
 export const allTarotsList:Tarot[] = Object.values(allTarots);
 
+//FIXME: dealTarots should be updated to return a tarotDeck
 export function dealTarots(num: number): Tarot[] {
   let shuffled = shuffle(allTarotsList);
   let dealt = shuffled.slice(0, num);
   return dealt;
+}
+
+
+export const baseTarotDeck = buildTarotDeck();
+export function buildTarotDeck():TarotDeck {
+  let tarotDeck:TarotDeck = {
+    deck: [],
+    dealtCards: [],
+    selectedCards: [],
+  };
+
+  tarotDeck['deck'] = structuredClone(allTarotsList);
+  return tarotDeck;
+}
+
+export function resetTarotDeck(baseDeck:TarotDeck=baseTarotDeck){
+  let reset = structuredClone(baseDeck);
+  reset['dealtCards'] = [];
+  reset['selectedCards'] = [];
+  return reset;
+}
+
+export const selectTarots = selectCards;
+export const unselectAllTarots = unselectAllCards;
+
+const tarotDeckFns = {
+  dealTarots,
+  selectTarots, //selectCards
+  unselectAllTarots, //unselectAllCards
+  buildTarotDeck,
+  resetTarotDeck,
 }
