@@ -6,10 +6,10 @@ import {shuffle} from '../misc';
 
 import { Tarot,
   TarotDeck,
-  DeckStatus,
   RunStatus,
   TarotFn,
   TarotFnResult,
+  CardDeck,
 } from "../../types/misc";
 
 import { selectCards, unselectAllCards } from './cards';
@@ -27,41 +27,59 @@ import { selectCards, unselectAllCards } from './cards';
  */
 const baseTarot = {
   name: '',
-  cardCount: 0, //how many cards should be selected to use Tarot
+  cardsUsed: [0], //how many cards should be selected to use Tarot
   price: 3,
   sellValue: 1,
   description: '',
 };
 
-const moon:Tarot = {
-  ...baseTarot,
-  name: 'moon',
-  description: "converts up to 3 cards' suits to clubs",
-  cardCount: 3,
-}
-function moonFn(baseDeck:DeckStatus,
-  baseRun:RunStatus):TarotFnResult {
-  let status = 'invalid';
-
-  let currentDeck = structuredClone(baseDeck);
-  let currentRun = structuredClone(baseRun);
+/** Wrapper for calling tarot functions, confirms
+ * cardCounts are correct, then calls relevant TarotFn.
+ * returns success status, and updated deck + runStatus */
+function useTarot(baseDeck:CardDeck, baseRun:RunStatus,
+  tarotCard:Tarot): TarotFnResult {
 
   let selectedCount = baseDeck.selectedCards.reduce((totalCount, selected) => {
     if (selected) totalCount++;
     return totalCount;
   }, 0);
-  if (selectedCount < 1 || selectedCount > moon.cardCount) {
-    return {deckStatus: currentDeck, runStatus: currentRun, status};
+  if (!tarotCard.cardsUsed.includes(selectedCount)) {
+    return {cardDeck: baseDeck, runStatus: baseRun, status: 'invalid'};
   }
 
-  //If valid selection, convert selections to clubs
-  currentDeck['dealtCards'].map((card, ind) => {
-    if (currentDeck['selectedCards'][ind]) card['suit'] = 'clubs';
-    return card;
-  });
+  //call specific Tarot function
+  const TarotFn = allTarotFunctions[tarotCard['name']];
+  let result = TarotFn(baseDeck, baseRun);
+  let {cardDeck, runStatus, status} = result;
 
   return {
-    deckStatus: currentDeck,
+    cardDeck,
+    runStatus,
+    status,
+  }
+}
+
+/** Enhance 3 Tarots */
+//'moon'|'star'|'sun'|'world'|
+const moon:Tarot = {
+  ...baseTarot,
+  name: 'moon',
+  description: "converts up to 3 cards' suits to clubs",
+  cardsUsed: [1,2,3],
+}
+function moonFn(baseDeck:CardDeck,
+  baseRun:RunStatus):TarotFnResult {
+  let status = 'success';
+  let currentDeck = structuredClone(baseDeck);
+  let currentRun = structuredClone(baseRun);
+
+  for (let i = 0; i < currentDeck['dealtCards'].length; i++){
+    if (currentDeck['selectedCards'][i]) currentDeck['dealtCards'][i].suit = 'clubs';
+  };
+  currentDeck['selectedCards'] = Array(currentDeck['dealtCards'].length).fill(false);
+
+  return {
+    cardDeck: currentDeck,
     runStatus: currentRun,
     status,
   }
@@ -70,31 +88,21 @@ const star:Tarot = {
   ...baseTarot,
   name: 'star',
   description: "converts up to 3 cards' suits to diamonds",
-  cardCount: 3,
+  cardsUsed: [1,2,3],
 }
-function starFn(baseDeck:DeckStatus,
+function starFn(baseDeck:CardDeck,
   baseRun:RunStatus):TarotFnResult {
-  let status = 'invalid';
-
+  let status = 'success';
   let currentDeck = structuredClone(baseDeck);
   let currentRun = structuredClone(baseRun);
 
-  let selectedCount = baseDeck.selectedCards.reduce((totalCount, selected) => {
-    if (selected) totalCount++;
-    return totalCount;
-  }, 0);
-  if (selectedCount < 1 || selectedCount > moon.cardCount) {
-    return {deckStatus: currentDeck, runStatus: currentRun, status};
-  }
-
-  //If valid selection, convert selections to clubs
-  currentDeck['dealtCards'].map((card, ind) => {
-    if (currentDeck['selectedCards'][ind]) card['suit'] = 'diamonds';
-    return card;
-  });
+  for (let i = 0; i < currentDeck['dealtCards'].length; i++){
+    if (currentDeck['selectedCards'][i]) currentDeck['dealtCards'][i].suit = 'diamonds';
+  };
+  currentDeck['selectedCards'] = Array(currentDeck['dealtCards'].length).fill(false);
 
   return {
-    deckStatus: currentDeck,
+    cardDeck: currentDeck,
     runStatus: currentRun,
     status,
   }
@@ -103,31 +111,21 @@ const sun:Tarot = {
   ...baseTarot,
   name: 'sun',
   description: "converts up to 3 cards' suits to hearts",
-  cardCount: 3,
+  cardsUsed: [1,2,3],
 }
-function sunFn(baseDeck:DeckStatus,
+function sunFn(baseDeck:CardDeck,
   baseRun:RunStatus):TarotFnResult {
-  let status = 'invalid';
-
+  let status = 'success';
   let currentDeck = structuredClone(baseDeck);
   let currentRun = structuredClone(baseRun);
 
-  let selectedCount = baseDeck.selectedCards.reduce((totalCount, selected) => {
-    if (selected) totalCount++;
-    return totalCount;
-  }, 0);
-  if (selectedCount < 1 || selectedCount > moon.cardCount) {
-    return {deckStatus: currentDeck, runStatus: currentRun, status};
-  }
-
-  //If valid selection, convert selections to clubs
-  currentDeck['dealtCards'].map((card, ind) => {
-    if (currentDeck['selectedCards'][ind]) card['suit'] = 'hearts';
-    return card;
-  });
+  for (let i = 0; i < currentDeck['dealtCards'].length; i++){
+    if (currentDeck['selectedCards'][i]) currentDeck['dealtCards'][i].suit = 'hearts';
+  };
+  currentDeck['selectedCards'] = Array(currentDeck['dealtCards'].length).fill(false);
 
   return {
-    deckStatus: currentDeck,
+    cardDeck: currentDeck,
     runStatus: currentRun,
     status,
   }
@@ -136,74 +134,152 @@ const world:Tarot = {
   ...baseTarot,
   name: 'world',
   description: "converts up to 3 cards' suits to spades",
-  cardCount: 3,
+  cardsUsed: [1,2,3],
 }
-function worldFn(baseDeck:DeckStatus,
+function worldFn(baseDeck:CardDeck,
   baseRun:RunStatus):TarotFnResult {
-  let status = 'invalid';
-
+  let status = 'success';
   let currentDeck = structuredClone(baseDeck);
   let currentRun = structuredClone(baseRun);
 
-  let selectedCount = baseDeck.selectedCards.reduce((totalCount, selected) => {
-    if (selected) totalCount++;
-    return totalCount;
-  }, 0);
-  if (selectedCount < 1 || selectedCount > moon.cardCount) {
-    return {deckStatus: currentDeck, runStatus: currentRun, status};
-  }
-
-  //If valid selection, convert selections to clubs
-  currentDeck['dealtCards'].map((card, ind) => {
-    if (currentDeck['selectedCards'][ind]) card['suit'] = 'spades';
-    return card;
-  });
+  for (let i = 0; i < currentDeck['dealtCards'].length; i++){
+    if (currentDeck['selectedCards'][i]) currentDeck['dealtCards'][i].suit = 'spades';
+  };
+  currentDeck['selectedCards'] = Array(currentDeck['dealtCards'].length).fill(false);
 
   return {
-    deckStatus: currentDeck,
+    cardDeck: currentDeck,
     runStatus: currentRun,
     status,
   }
 }
 
 
+/** Enhance 2 Tarots */
+//'magician'|'empress'|'hierophant'|'strength'|
+const magician:Tarot = {
+  ...baseTarot,
+  name: 'magician',
+  description: 'enhances up to 2 selected cards into lucky cards',
+  cardsUsed: [1,2],
+}
+function magicianFn(baseDeck:CardDeck,
+  baseRun:RunStatus):TarotFnResult {
+  let status = 'success';
+  let currentDeck = structuredClone(baseDeck);
+  let currentRun = structuredClone(baseRun);
 
+  for (let i = 0; i < currentDeck['dealtCards'].length; i++){
+    if (currentDeck['selectedCards'][i]) currentDeck['dealtCards'][i].enhanced = 'lucky';
+  };
+  currentDeck['selectedCards'] = Array(currentDeck['dealtCards'].length).fill(false);
+
+  return {
+    cardDeck: currentDeck,
+    runStatus: currentRun,
+    status,
+  }
+}
+const empress:Tarot = {
+  ...baseTarot,
+  name: 'empress',
+  description: 'enhances up to 2 selected cards into lucky cards',
+  cardsUsed: [1,2],
+}
+function empressFn(baseDeck:CardDeck,
+  baseRun:RunStatus):TarotFnResult {
+  let status = 'success';
+  let currentDeck = structuredClone(baseDeck);
+  let currentRun = structuredClone(baseRun);
+
+  for (let i = 0; i < currentDeck['dealtCards'].length; i++){
+    if (currentDeck['selectedCards'][i]) currentDeck['dealtCards'][i].enhanced = 'mult';
+  };
+  currentDeck['selectedCards'] = Array(currentDeck['dealtCards'].length).fill(false);
+
+  return {
+    cardDeck: currentDeck,
+    runStatus: currentRun,
+    status,
+  }
+}
+const hierophant:Tarot = {
+  ...baseTarot,
+  name: 'hierophant',
+  description: 'enhances up to 2 selected cards into bonus chip cards',
+  cardsUsed: [1, 2],
+}
+function hierophantFn(baseDeck:CardDeck,
+  baseRun:RunStatus):TarotFnResult {
+  let status = 'success';
+  let currentDeck = structuredClone(baseDeck);
+  let currentRun = structuredClone(baseRun);
+
+  for (let i = 0; i < currentDeck['dealtCards'].length; i++){
+    if (currentDeck['selectedCards'][i]) currentDeck['dealtCards'][i].enhanced = 'bonus';
+  };
+  currentDeck['selectedCards'] = Array(currentDeck['dealtCards'].length).fill(false);
+
+  return {
+    cardDeck: currentDeck,
+    runStatus: currentRun,
+    status,
+  }
+}
+const strength:Tarot = {
+  ...baseTarot,
+  name: 'strength',
+  description: "increases up to 2 selected cards' ranks by 1",
+  cardsUsed: [1, 2],
+}
+function strengthFn(baseDeck:CardDeck,
+  baseRun:RunStatus):TarotFnResult {
+  let status = 'success';
+  let currentDeck = structuredClone(baseDeck);
+  let currentRun = structuredClone(baseRun);
+
+  for (let i = 0; i < currentDeck['dealtCards'].length; i++){
+    if (currentDeck['selectedCards'][i]) {
+      if (currentDeck['dealtCards'][i].rank === 13){
+        currentDeck['dealtCards'][i].rank = 1; //king to ace
+      } else {
+        currentDeck['dealtCards'][i].rank += 1;
+      }
+    }
+  };
+  currentDeck['selectedCards'] = Array(currentDeck['dealtCards'].length).fill(false);
+
+  return {
+    cardDeck: currentDeck,
+    runStatus: currentRun,
+    status,
+  }
+}
+
+
+/** Enhance 1 Tarots */
+//   'lovers'|'chariot'|'justice'|'devil'|'tower'|
 const lovers:Tarot = {
   ...baseTarot,
   name: 'lovers',
   description: 'enhances 1 selected card into wildcard',
-  cardCount: 1,
+  cardsUsed: [1],
 };
-function loversFn(baseDeck:DeckStatus,
+function loversFn(baseDeck:CardDeck,
   baseRun:RunStatus):TarotFnResult {
-  let status = 'invalid';
-
+  let status = 'success';
   let currentDeck = structuredClone(baseDeck);
   let currentRun = structuredClone(baseRun);
 
-  //check whether valid selection
-  const selectCount = currentDeck['selectedCards'].reduce((count, selected) => {
-    if (selected) count += 1;
-    return count;
-  }, 0);
-  if (selectCount !== lovers['cardCount']){
-    return {deckStatus: currentDeck, runStatus: currentRun, status};
-  } else {
-    status = 'success';
-  }
-
   //modify card(s)
   for (let i = 0; i < currentDeck['dealtCards'].length; i++){
-    if (currentDeck['selectedCards'][i]){
-      currentDeck['dealtCards'][i].enhanced = 'wild';
-    }
+    if (currentDeck['selectedCards'][i]) currentDeck['dealtCards'][i].enhanced = 'wild';
   }
-
   //unselect all
   currentDeck['selectedCards'] = Array(currentDeck['dealtCards'].length).fill(false);
 
   return {
-    deckStatus: currentDeck,
+    cardDeck: currentDeck,
     runStatus: currentRun,
     status,
   }
@@ -212,27 +288,16 @@ function loversFn(baseDeck:DeckStatus,
 
 
 const hangedMan:Tarot = {
+  ...baseTarot,
   name:'hangedMan',
-  cardCount: 2,
-  price: 3,
-  sellValue: 1,
   description: 'destroys up to 2 selected cards',
+  cardsUsed: [1, 2],
 }
-function hangedManFn(
-  baseDeck:DeckStatus,
-  baseRun:RunStatus
-):TarotFnResult {
+function hangedManFn(baseDeck:CardDeck,
+  baseRun:RunStatus):TarotFnResult {
   let currentDeck = structuredClone(baseDeck);
   let currentRun = structuredClone(baseRun);
-  let status = 'invalid';
-
-  //Check if tarot can be used
-  let selectedCount = currentDeck.selectedCards.reduce(
-    (count, selected) => selected ? count + 1: count,  0);
-
-  if (selectedCount === 0 || selectedCount > 2){
-    return {deckStatus: currentDeck, runStatus: currentRun, status};
-  }
+  let status = 'success';
 
   //Use tarot (remove cards)
   currentDeck['dealtCards'] = currentDeck['dealtCards'].filter((_, ind) => {
@@ -240,9 +305,8 @@ function hangedManFn(
   });
   currentDeck['selectedCards'] = Array(currentDeck['dealtCards'].length).fill(false);
 
-  status = 'success';
   return {
-    deckStatus: currentDeck,
+    cardDeck: currentDeck,
     runStatus: currentRun,
     status,
   }
@@ -258,7 +322,12 @@ export const allTarotFunctions: AllTarotFunctions = {
   star: starFn,
   sun: sunFn,
   world: worldFn,
+  magician: magicianFn,
+  empress: empressFn,
+  hierophant: hierophantFn,
+  strength: strengthFn,
   lovers: loversFn,
+  hangedMan: hangedManFn,
 }
 
 type Tarots = {
@@ -269,7 +338,12 @@ export const allTarots:Tarots = {
   star,
   sun,
   world,
+  magician,
+  empress,
+  hierophant,
+  strength,
   lovers,
+  hangedMan,
 }
 export const allTarotsList:Tarot[] = Object.values(allTarots);
 
@@ -309,7 +383,7 @@ export function dealTarots(num: number, baseDeck=baseTarotDeck): TarotDeck {
 export const selectTarots = selectCards;
 export const unselectAllTarots = unselectAllCards;
 
-const tarotDeckFns = {
+export const tarotDeckFns = {
   dealTarots,
   selectTarots, //selectCards
   unselectAllTarots, //unselectAllCards

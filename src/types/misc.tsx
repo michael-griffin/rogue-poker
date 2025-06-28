@@ -36,18 +36,18 @@ export type Joker = {
 
 export type Tarot = {
   name: TarotTypes,
-  cardCount: number, //0, 1, 2, 3
+  cardsUsed: number[], //0, 1, 2, 3
   price: number,
   sellValue: number,
   description: string
 }
 
 export type TarotFnResult = {
-  deckStatus: DeckStatus,
+  cardDeck: CardDeck,
   runStatus: RunStatus,
   status: string,
 }
-export type TarotFn = (baseDeck:DeckStatus, baseRun:RunStatus) => TarotFnResult;
+export type TarotFn = (baseDeck:CardDeck, baseRun:RunStatus) => TarotFnResult;
 
 export type Planet = {
   name: PlanetTypes,
@@ -127,15 +127,15 @@ export type RoundStatus = {
 }
 
 
-export type DeckStatus = {
-  deck: Card[],
-  dealtCards: Card[], //handSize active cards, can be played or discarded.
-  selectedCards: boolean[],
-  playedCards: Card[],
-  unplayedCards: Card[],
-  usedCards: Card[], //discarded or played
-  remainingCards: Card[], //deck remaining
-}
+// export type DeckStatus = {
+//   deck: Card[],
+//   dealtCards: Card[], //handSize active cards, can be played or discarded.
+//   selectedCards: boolean[],
+//   playedCards: Card[],
+//   unplayedCards: Card[],
+//   usedCards: Card[], //discarded or played
+//   remainingCards: Card[], //deck remaining
+// }
 export type CardDeck = {
   deck: Card[],
   dealtCards: Card[], //handSize active cards, can be played or discarded.
