@@ -284,6 +284,188 @@ function loversFn(baseDeck:CardDeck,
     status,
   }
 }
+const chariot:Tarot = {
+  ...baseTarot,
+  name: 'chariot',
+  description: 'enhances 1 selected card into steel',
+  cardsUsed: [1],
+};
+function chariotFn(baseDeck:CardDeck,
+  baseRun:RunStatus):TarotFnResult {
+  let status = 'success';
+  let currentDeck = structuredClone(baseDeck);
+  let currentRun = structuredClone(baseRun);
+
+  //modify card(s)
+  for (let i = 0; i < currentDeck['dealtCards'].length; i++){
+    if (currentDeck['selectedCards'][i]) currentDeck['dealtCards'][i].enhanced = 'steel';
+  }
+  //unselect all
+  currentDeck['selectedCards'] = Array(currentDeck['dealtCards'].length).fill(false);
+
+  return {
+    cardDeck: currentDeck,
+    runStatus: currentRun,
+    status,
+  }
+}
+const justice:Tarot = {
+  ...baseTarot,
+  name: 'justice',
+  description: 'enhances 1 selected card into glass',
+  cardsUsed: [1],
+};
+function justiceFn(baseDeck:CardDeck,
+  baseRun:RunStatus):TarotFnResult {
+  let status = 'success';
+  let currentDeck = structuredClone(baseDeck);
+  let currentRun = structuredClone(baseRun);
+
+  //modify card(s)
+  for (let i = 0; i < currentDeck['dealtCards'].length; i++){
+    if (currentDeck['selectedCards'][i]) currentDeck['dealtCards'][i].enhanced = 'glass';
+  }
+  //unselect all
+  currentDeck['selectedCards'] = Array(currentDeck['dealtCards'].length).fill(false);
+
+  return {
+    cardDeck: currentDeck,
+    runStatus: currentRun,
+    status,
+  }
+}
+const devil:Tarot = {
+  ...baseTarot,
+  name: 'devil',
+  description: 'enhances 1 selected card into gold',
+  cardsUsed: [1],
+};
+function devilFn(baseDeck:CardDeck,
+  baseRun:RunStatus):TarotFnResult {
+  let status = 'success';
+  let currentDeck = structuredClone(baseDeck);
+  let currentRun = structuredClone(baseRun);
+
+  //modify card(s)
+  for (let i = 0; i < currentDeck['dealtCards'].length; i++){
+    if (currentDeck['selectedCards'][i]) currentDeck['dealtCards'][i].enhanced = 'gold';
+  }
+  //unselect all
+  currentDeck['selectedCards'] = Array(currentDeck['dealtCards'].length).fill(false);
+
+  return {
+    cardDeck: currentDeck,
+    runStatus: currentRun,
+    status,
+  }
+}
+const tower:Tarot = {
+  ...baseTarot,
+  name: 'tower',
+  description: 'enhances 1 selected card into stone',
+  cardsUsed: [1],
+};
+function towerFn(baseDeck:CardDeck,
+  baseRun:RunStatus):TarotFnResult {
+  let status = 'success';
+  let currentDeck = structuredClone(baseDeck);
+  let currentRun = structuredClone(baseRun);
+
+  //modify card(s)
+  for (let i = 0; i < currentDeck['dealtCards'].length; i++){
+    if (currentDeck['selectedCards'][i]) currentDeck['dealtCards'][i].enhanced = 'stone';
+  }
+  //unselect all
+  currentDeck['selectedCards'] = Array(currentDeck['dealtCards'].length).fill(false);
+
+  return {
+    cardDeck: currentDeck,
+    runStatus: currentRun,
+    status,
+  }
+}
+
+/** Create Misc Tarots */
+//   'fool'|'highPriestess'|'emperor'|'judgment'|
+
+
+
+/** Bonuses Tarots */
+//   'wheelOfFortune'|'hermit'|'temperance'|       //bonus
+
+const wheelOfFortune:Tarot = {
+  ...baseTarot,
+  name: 'wheelOfFortune',
+  description: '25% chance to upgrade random joker',
+  cardsUsed: [0],
+};
+//FIXME: get wheelOfFortune working
+function wheelOfFortuneFn(baseDeck:CardDeck,
+  baseRun:RunStatus):TarotFnResult {
+  let status = 'success';
+  let currentDeck = structuredClone(baseDeck);
+  let currentRun = structuredClone(baseRun);
+
+  //TODO: implement pseudo code
+
+  //filter jokers for unmodified
+  //check that at least 1 unmodified joker, if none quit early
+
+  //choose random joker, choose random upgrade
+
+  return {
+    cardDeck: currentDeck,
+    runStatus: currentRun,
+    status,
+  }
+}
+const hermit:Tarot = {
+  ...baseTarot,
+  name: 'hermit',
+  description: 'double money, up to a max of $20',
+  cardsUsed: [0],
+};
+function hermitFn(baseDeck:CardDeck,
+  baseRun:RunStatus):TarotFnResult {
+  let status = 'success';
+  let currentDeck = structuredClone(baseDeck);
+  let currentRun = structuredClone(baseRun);
+
+  let bonus = Math.min(currentRun.currentMoney, 20);
+  currentRun.currentMoney += bonus;
+
+  return {
+    cardDeck: currentDeck,
+    runStatus: currentRun,
+    status,
+  }
+}
+const temperance:Tarot = {
+  ...baseTarot,
+  name: 'temperance',
+  description: 'add all jokers sell value to money',
+  cardsUsed: [1],
+};
+function temperanceFn(baseDeck:CardDeck,
+  baseRun:RunStatus):TarotFnResult {
+  let status = 'success';
+  let currentDeck = structuredClone(baseDeck);
+  let currentRun = structuredClone(baseRun);
+
+  let jokers = currentRun.jokers;
+  let bonus = jokers.reduce((bonus, joker) => {
+    let {sellValue} = joker;
+    return bonus + sellValue;
+  }, 0);
+
+  currentRun.currentMoney += bonus;
+
+  return {
+    cardDeck: currentDeck,
+    runStatus: currentRun,
+    status,
+  }
+}
 
 
 
@@ -327,6 +509,10 @@ export const allTarotFunctions: AllTarotFunctions = {
   hierophant: hierophantFn,
   strength: strengthFn,
   lovers: loversFn,
+  chariot: chariotFn,
+  justice: justiceFn,
+  devil: devilFn,
+  tower: towerFn,
   hangedMan: hangedManFn,
 }
 
@@ -343,6 +529,10 @@ export const allTarots:Tarots = {
   hierophant,
   strength,
   lovers,
+  chariot,
+  justice,
+  devil,
+  tower,
   hangedMan,
 }
 export const allTarotsList:Tarot[] = Object.values(allTarots);
