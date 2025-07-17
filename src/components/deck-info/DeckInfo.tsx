@@ -1,4 +1,8 @@
-import {buildSimpleDeck, findCards} from '../../types/misc-functions';
+import './DeckInfo.css'; //styles from
+
+import { Suit } from '../../types/misc';
+import {buildSimpleDeck, findCards} from '../../helpers/cards/cards';
+import { rankNames } from '../../helpers/constants';
 
 //TODO: update so deck is imported with props rather than using a
 //prebuilt placeholder
@@ -12,51 +16,83 @@ function DeckInfo(){
 
 
   function makeCardListsJSX(){
-    let spadesCards = findCards('suit', 'spades', myDeck);
-    let heartsCards = findCards('suit', 'hearts', myDeck);
-    let clubsCards = findCards('suit', 'clubs', myDeck);
-    let diamondsCards = findCards('suit', 'diamonds', myDeck);
+    const fullContainer = [];
+    const suits:Suit[] = ['spades', 'hearts', 'clubs', 'diamonds'];
 
+    for (let suit of suits){
+      const cards = findCards(myDeck, 'suit', suit);
+      const cardsJSX = cards.map((card, ind) => {
+        const {rank, suit} = card;
+        const rankName = rankNames[rank];
+        const cardJSX = <div className="card-container">
+          <img className="card-img" src={`cards/${rankName}-${suit}.png`} />
+        </div>;
+        return cardJSX;
+      });
 
-    let spadesCardsJSX = spadesCards.map((card, ind) => {
-      const {rank:cardRank, suit:cardSuit} = card;
-      return <img className="row-card" src={`cards/${cardRank}-${cardSuit}`} />
-    });
-
-    let fullContainer = <div className="">
-      <div className="row-spades">{spadesCardsJSX}</div>
-
-    </div>
+      const rowJSX = <div className="row">{cardsJSX}</div>;
+      fullContainer.push(rowJSX);
+    }
+    return fullContainer;
   }
+
+
 
   function makeRankCountsJSX(){
-    let ranks = [1, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2];
-    let rankLabels = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'];
+    const ranks = [1, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2];
+    const rankLabels = ['A', 'K', 'Q', 'J', '10', '9', '8', '7', '6', '5', '4', '3', '2'];
+    const countsJSX = [];
+    for (let i = 0; i < ranks.length; i++){
+      let currCount = 4; //FIXME: update to use findCards, search by ranks[i]
 
+      let countJSX = <div className="count-container">
+        <div className="rank-label">
+          <div className="label-text">{rankLabels[i]}</div>
+        </div>
+        <div className="rank-count">{currCount}</div>
+      </div>
+      countsJSX.push(countJSX);
+    }
+    return countsJSX;
   }
 
+
   return (
-    <div className="deck-info-area">
-      <div className="top-buttons">
+    <div className="deckinfo-area">
+      <div className="deckinfo-top">
         <div className="deck-button">Deck</div>
-        <div className="vouchers-button">Vouchers</div>
-        <div className="poker-hands-button">Poker Hands</div>
-        <div className="blinds-button">Blinds</div>
       </div>
-      <div className="middle-outer" >
-        <aside className="middle-left-info">
+      <div className="deckinfo-middle" >
+        <aside className="middle-left">
           <div className="left-summary">
+            <div className="decktype">
+              <div className="decktype-name">Deck Name</div>
+              <div className="decktype-infobox">Info textbox</div>
+            </div>
+            <div className="cardtype-counts">
+              <div>Base Cards</div>
 
+              {/* Base - ace:4 face:14 num:38
+              spade, heart, club diamond counts*/}
+            </div>
           </div>
-          <div className="left-rank-counts">
-
+          <div className="rank-counts">
+            {/* <div className="count-container">
+              <div className="rank-label"><div className="label-text">A</div></div>
+              <div className="rank-count">4</div>
+            </div>
+            <div className="count-container">
+              <div className="rank-label">10</div>
+              <div className="rank-count">3</div>
+            </div> */}
+            {makeRankCountsJSX()}
           </div>
         </aside>
-        <div className="middle-main">
-
-        </div>
+        <main className="allcards">
+          {makeCardListsJSX()}
+        </main>
       </div>
-      <footer>
+      <footer className="deckinfo-bottom">
 
       </footer>
     </div>
