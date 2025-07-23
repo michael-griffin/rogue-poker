@@ -58,31 +58,10 @@ export type Planet = {
   handType: HandTypes,
   hidden: boolean //for flushFive, other 'secret' planets
 }
-/*
-{
-  bestHand: 'flush',
-  highScore: 600,
-  handTypes: [flush, threeOf, pair],
-  hands {
-    royalFlush: undefined,
-    straightFlush: undefined,
-    straight: undefined,
-    flush: [Card1, Card2, ...],
-    fiveOf: undefined,
-    fourOf: undefined,
-    threeOf: [Card1, Card2, ...],
-    pair: [Card1, Card2],
-    twoPair: undefined,
-    fullHouse: undefined,
-  }
-}
-*/
-type SkipTagTypes =  'uncommonJoker' | 'rareJoker' | 'negativeJoker' |
-  'foilJoker' | 'holoJoker' | 'polyJoker' |
-  'coupon' | 'rerollDiscount' | 'gainTwoJokers' |
-  'doubleMoney' | 'handPayoff' | 'discardPayoff' | 'skipPayoff' |
-  'celestialPack' | 'jokerPack' | 'tarotPack' | 'spectralPack' |
-  'bossReroll' | 'orbital';
+
+export type HandTypes = 'highCard' | 'pair' | 'threeOf' | 'fourOf' |
+  'fiveOf' | 'flushFive' | 'twoPair' | 'fullHouse' | 'flushHouse' |
+  'flush' | 'straight' | 'straightFlush' | 'royalFlush';
 
 export type TarotTypes = 'moon'|'star'|'sun'|'world'|  //suit change for 3
   'magician'|'empress'|'hierophant'|'strength'| //enhance 2
@@ -93,6 +72,18 @@ export type TarotTypes = 'moon'|'star'|'sun'|'world'|  //suit change for 3
 
 export type PlanetTypes = 'mercury'| 'venus'| 'earth' | 'mars' |
 'jupiter' | 'saturn' | 'neptune' | 'uranus' | 'pluto';
+
+export type VoucherTypes = 'blank' | 'bossReroll' | 'clearance' | 'consumable' |
+  'discardsLeft' | 'handsLeft' | 'handSize' | 'hieroglyph' | 'overstock' |
+  'planet' | 'reroll' | 'seedMoney' | 'shopCards' | 'specialCards' |
+  'tarot' | 'telescope';
+
+type SkipTagTypes =  'uncommonJoker' | 'rareJoker' | 'negativeJoker' |
+  'foilJoker' | 'holoJoker' | 'polyJoker' |
+  'coupon' | 'rerollDiscount' | 'gainTwoJokers' |
+  'doubleMoney' | 'handPayoff' | 'discardPayoff' | 'skipPayoff' |
+  'celestialPack' | 'jokerPack' | 'tarotPack' | 'spectralPack' |
+  'bossReroll' | 'orbital';
 
 
 //FIXME: May also want a runSeed or similar
@@ -114,7 +105,7 @@ export type RunStatus = {
   vouchers: VoucherTypes[],
   inventory: string[], //Tarots, Planets, Spectral Cards
   lastUsed: string | null, //Tarot or Planet
-  handRecord: {},
+  handRecord: {} | HandRecord,
 }
 
 
@@ -127,15 +118,9 @@ export type RoundStatus = {
 }
 
 
-// export type DeckStatus = {
-//   deck: Card[],
-//   dealtCards: Card[], //handSize active cards, can be played or discarded.
-//   selectedCards: boolean[],
-//   playedCards: Card[],
-//   unplayedCards: Card[],
-//   usedCards: Card[], //discarded or played
-//   remainingCards: Card[], //deck remaining
-// }
+
+
+//TODO: may need a cardOrder: number[], field to handle Drag and drop moves
 export type CardDeck = {
   deck: Card[],
   dealtCards: Card[], //handSize active cards, can be played or discarded.
@@ -145,36 +130,20 @@ export type CardDeck = {
   usedCards: Card[], //discarded or played
   remainingCards: Card[], //deck remaining
 }
-
-
 export type TarotDeck = {
   deck: Tarot[],
   dealtCards: Tarot[],
   selectedCards: boolean[],
 }
-
 export type PlanetDeck = {
   deck: Planet[],
   dealtCards: Planet[],
   selectedCards: boolean[],
 }
 
-export type ShelfItem = {category: string, item:Joker|Card|Tarot|Planet};
-function buildStock(){
-  const shelf:ShelfItem[] = [];
-  const voucher:VoucherTypes[] = [];
-  const pack:Pack[] = [];
-  return {shelf, voucher, pack};
-}
-export type ShopStock = {
-  shelf: ShelfItem[],
-  vouchers: VoucherTypes[],
-  packs: Pack[],
-}
 
-export type HandTypes = 'highCard' | 'pair' | 'threeOf' | 'fourOf' |
-  'fiveOf' | 'flushFive' | 'twoPair' | 'fullHouse' | 'flushHouse' |
-  'flush' | 'straight' | 'straightFlush' | 'royalFlush';
+
+
 //FIXME: string is less specific, but using HandTypes or [key in HandTypes]: Card[]
 //has TS expect ALL of the provided handtypes
 export type HandStatus = {
@@ -184,21 +153,41 @@ export type HandStatus = {
   handTypes: HandTypes[]
   scoredCards: Record<string, boolean[]>;
 }
+export type HandRecord = {
+  [key in HandTypes]: {play: number, level: number}
+}
+
+// export type HandRecord = {
+//   highCard:       {play: number, level: number},
+//   pair:           {play: number, level: number},
+//   threeOf:        {play: number, level: number},
+//   fourOf:         {play: number, level: number},
+//   fiveOf:         {play: number, level: number},
+//   flushFive:      {play: number, level: number},
+//   twoPair:        {play: number, level: number},
+//   fullHouse:      {play: number, level: number},
+//   flushHouse:     {play: number, level: number},
+//   flush:          {play: number, level: number},
+//   straight:       {play: number, level: number},
+//   straightFlush:  {play: number, level: number},
+//   royalFlush:     {play: number, level: number},
+// };
 
 
 
-export type VoucherTypes = 'blank' | 'bossReroll' | 'clearance' | 'consumable' |
-  'discardsLeft' | 'handsLeft' | 'handSize' | 'hieroglyph' | 'overstock' |
-  'planet' | 'reroll' | 'seedMoney' | 'shopCards' | 'specialCards' |
-  'tarot' | 'telescope';
-
-
+export type ShelfItem = {category: string, item:Joker|Card|Tarot|Planet};
 export type Pack = {
   packType: 'planet'|'tarot',
   size: 'normal'|'jumbo'|'mega',
   cardCount: 4|5|6,
   version: 1|2,
 };
+export type ShopStock = {
+  shelf: ShelfItem[],
+  vouchers: VoucherTypes[],
+  packs: Pack[],
+}
+
 
 
 export type ScoreChange = {
@@ -208,18 +197,3 @@ export type ScoreChange = {
 };
 
 
-export type HandRecord = {
-    highCard:       {play: number, level: number},
-    pair:           {play: number, level: number},
-    threeOf:        {play: number, level: number},
-    fourOf:         {play: number, level: number},
-    fiveOf:         {play: number, level: number},
-    flushFive:      {play: number, level: number},
-    twoPair:        {play: number, level: number},
-    fullHouse:      {play: number, level: number},
-    flushHouse:     {play: number, level: number},
-    flush:          {play: number, level: number},
-    straight:       {play: number, level: number},
-    straightFlush:  {play: number, level: number},
-    royalFlush:     {play: number, level: number},
-  };
