@@ -1,15 +1,17 @@
 import { useState } from 'react'
-import './App.css'
-import DnDmain from './dnd-demo/DnDmain'
+import Dndmain from './dnd-demo/DndMain'
 import GameMain from './components/game/GameMain'
+import DeckInfo from './components/deck-info/DeckInfo'
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <>
-      {/* <DnDmain /> */}
-      <GameMain />
+      {/* <Example_App /> */}
+      <Dndmain />
+      {/* <GameMain /> */}
+      {/* <DeckInfo /> */}
     </>
   )
 }
