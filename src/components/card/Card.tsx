@@ -1,11 +1,12 @@
 import "./Card.css";
-// import {useState} from 'react';
-import { useSortable } from "@dnd-kit/sortable";
-import {CSS} from "@dnd-kit/utilities";
-import { CardComponent } from "../../types/misc-types";
-import { getRankStr } from "../../types/misc-functions";
+import { RankNum, Card as TCard } from "../../types/misc";
+import { rankNames } from "../../helpers/constants";
 
 
+type CardComponent = TCard & {
+  id: number,
+  selected: boolean
+}
 type ToggleSelectedFn = (id: number) => void;
 type CardComponentProps = {
   card: CardComponent,
@@ -13,16 +14,10 @@ type CardComponentProps = {
 }
 
 function Card({card, toggleSelected}: CardComponentProps){
-  const {id, selected, rank, suit, type, enhanced, special, seal} = card;
-  const {attributes, listeners, setNodeRef,
-    transform, transition} = useSortable({id});
+  const {id, selected, rank, suit, cardType, enhanced, special, seal} = card;
+  const rankName = rankNames[rank as RankNum]
 
-  const style = {
-    transition,
-    transform: CSS.Transform.toString(transform),
-  };
-
-  const imgSrc = `/cards/${getRankStr(rank)}-${suit}.png`;
+  const imgSrc = `/cards/${rankName}-${suit}.png`;
   function handleClick(){
     toggleSelected(id);
     console.log('clicked card');
@@ -30,12 +25,7 @@ function Card({card, toggleSelected}: CardComponentProps){
   const selectedClass = selected ? 'selected' : '';
 
   return (
-    <div
-      style= {style}
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-    >
+    <div>
       <img className={`card ${selectedClass}`} src={imgSrc} onClick={handleClick}/>
     </div>
   )
