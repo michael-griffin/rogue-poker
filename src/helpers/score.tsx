@@ -5,10 +5,12 @@ https://balatrogame.fandom.com/wiki/Poker_Hands
 https://balatrogame.fandom.com/wiki/Planet_Cards
 */
 
+//TODO: update deckStatus -> cardDeck
+
 //import { allJokerFunctions } from "./jokers";
 import { ScoreChange, Joker, Card,
-  RunStatus, DeckStatus, RoundStatus, HandStatus} from "../types/misc";
-import { findActiveJokers } from "./misc";
+  RunStatus, CardDeck, RoundStatus, HandStatus} from "../types/misc";
+import { findActiveJokers } from "./cards/jokers";
 import { checkAllHands } from "./check";
 
 /*base scoring goals for each ante, starting at Ante 0

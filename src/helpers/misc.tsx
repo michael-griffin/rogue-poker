@@ -1,3 +1,6 @@
+//TODO: this is pretty unorganized. Current plan is to try and mirror zustand
+//and have an 'actions' section that can accomplish most of this.
+
 import {
   RankNum,
   CardType,
@@ -14,7 +17,6 @@ import {
   PlanetDeck,
   Pack,
   VoucherTypes,
-  DeckStatus,
   RunStatus,
   RoundStatus,
   ShelfItem,
@@ -40,11 +42,11 @@ import { allJokerFunctions, findActiveJokers,
 
 
 
-export function finishRound(baseDeck:DeckStatus,
+export function finishRound(baseDeck:CardDeck,
   baseRun:RunStatus,
   baseRound:RoundStatus) {
 
-  let currentDeck:DeckStatus = structuredClone(baseDeck);
+  let currentDeck:CardDeck = structuredClone(baseDeck);
   let currentRun:RunStatus = structuredClone(baseRun);
   let currentRound:RoundStatus = structuredClone(baseRound);
 
@@ -66,7 +68,7 @@ export function finishRound(baseDeck:DeckStatus,
 
 
   return {
-    deckStatus: cleanDeck,
+    cardDeck: cleanDeck,
     runStatus: currentRun,
     roundStatus: cleanRoundStats,
   }
@@ -193,7 +195,7 @@ function buildPackVariations(){
  * @param baseRun
  * @returns
  */
-function usePack(pack:Pack, baseDeck:DeckStatus, baseRun:RunStatus,
+function usePack(pack:Pack, baseDeck:CardDeck, baseRun:RunStatus,
   selectInstructions='simple'){
 
   let currentDeck = structuredClone(baseDeck);
@@ -229,12 +231,12 @@ function usePack(pack:Pack, baseDeck:DeckStatus, baseRun:RunStatus,
 
     //call tarot function that updates cardDeck or runStatus
 
-    // currentDeck = result['deckStatus'];
+    // currentDeck = result['cardDeck'];
     // currentRun = result['runStatus'];
   }
 
   return {
-    deckStatus: currentDeck,
+    cardDeck: currentDeck,
     runStatus: currentRun,
   }
 }
@@ -308,7 +310,7 @@ function useTarot(
   let tarotResult = tarotFn(currentDeck, currentRun);
   return tarotResult;
 }
-// function openTarotPack(pack:Pack, baseDeck:DeckStatus,
+// function openTarotPack(pack:Pack, baseDeck:CardDeck,
 //   baseRun:RunStatus){
 //   let {size:sizeName, packType} = pack;
 //   if (packType !== 'tarot') throw new Error('incorrect pack passed');
@@ -316,7 +318,7 @@ function useTarot(
 //   let packSizes = {'normal': 4, 'jumbo': 5, 'mega': 6};
 //   let packSize = packSizes[sizeName];
 
-//   let currentDeck:DeckStatus = structuredClone(baseDeck);
+//   let currentDeck:CardDeck = structuredClone(baseDeck);
 //   let currentRun:RunStatus = structuredClone(baseRun);
 
 //   let dealtTarots = dealTarots(packSize);
@@ -337,7 +339,7 @@ function useTarot(
 //   let tarotResult = tarotFn(currentDeck, currentRun);
 
 //   return {
-//     deckStatus: tarotResult['deckStatus'],
+//     cardDeck: tarotResult['cardDeck'],
 //     runStatus: tarotResult['runStatus'],
 //   }
 // }

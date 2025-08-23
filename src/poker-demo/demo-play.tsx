@@ -1,32 +1,37 @@
-import {checkStraight, checkFlush} from '../helpers/check';
+import { stockShop } from '../helpers/actions/shop';
+import { buildRunStatus } from '../helpers/actions/run';
+import { buildRoundStatus, finishRound } from '../helpers/actions/round';
 import {
-  buildRunStatus,
-  buildRoundStatus,
-  buildDeckStatus,
-  buildStartDeck,
+  buildCardDeck,
   selectCards,
   dealCards,
   discardCards,
-  playCards,
-  finishRound,
+  playCards
+} from '../helpers/cards/cards';
+import {checkStraight, checkFlush} from '../helpers/check';
+import {
   shuffle,
   chooseRandom,
  } from '../helpers/misc';
 import {
-  DeckStatus,
+  CardDeck,
   RunStatus,
   RoundStatus,
 } from '../types/misc';
 
 
-let myDeck = buildStartDeck();
+
+let myDeck = buildCardDeck();
 
 
 
 //play Game
 function playGame() {
-  let {deckStatus, runStatus, roundStatus} = setupStart();
+  let {cardDeck, runStatus, roundStatus} = setupStart();
 
+  let shopResult = goShopping(cardDeck, runStatus);
+  //console.log(shopResult);
+  return;
   //check currentRound (0 -> small, 1-> big, 2 -> boss.
   //play blind or skip
   let currentRound = runStatus.currentRound;
@@ -38,8 +43,8 @@ function playGame() {
 
   if (playBind){
     let instructions = buildRoundInstructions();
-    let roundResults = playRound(deckStatus, runStatus, roundStatus, instructions);
-    deckStatus = roundResults.deckStatus;
+    let roundResults = playRound(cardDeck, runStatus, roundStatus, instructions);
+    cardDeck = roundResults.cardDeck;
     runStatus = roundResults.runStatus;
     roundStatus = roundResults.roundStatus;
   } else {
@@ -52,21 +57,21 @@ function playGame() {
 }
 
 /**
- * build a deck, then build deckStatus
+ * build cardDeck
  * build RunStatus
  * build RoundStatus
- * FOR THE FUTURE: different difficulties could switch
- * parameters in deck/run status. Eg., starting money.
- * Could do something similar with deck choice
+ * FOR THE FUTURE:
+ * - difficulties: could switch parameters in runStatus. Eg., starting money.
+ * - multiple decks
  */
 function setupStart(difficulty:'normal'|'hard'|'hell'='normal') {
 
-  const baseDeck = buildDeckStatus();
+  const baseDeck = buildCardDeck();
   const baseRun = buildRunStatus();
   const baseRound = buildRoundStatus();
 
   return {
-    deckStatus: baseDeck,
+    cardDeck: baseDeck,
     runStatus: baseRun,
     roundStatus: baseRound,
   }
@@ -79,12 +84,12 @@ type RoundInstruction = ['discard'|'play', number[]];
 /**
  *
  */
-function playRound(baseDeck:DeckStatus,
+function playRound(baseDeck:CardDeck,
   baseRun:RunStatus,
   baseRound:RoundStatus,
   instructions:RoundInstruction[]){
 
-  let currentDeck:DeckStatus = structuredClone(baseDeck);
+  let currentDeck:CardDeck = structuredClone(baseDeck);
   let currentRun:RunStatus = structuredClone(baseRun);
   let currentRound:RoundStatus = structuredClone(baseRound);
 
@@ -122,7 +127,7 @@ function playRound(baseDeck:DeckStatus,
 
   //finish Round
   let roundResults = finishRound(currentDeck, currentRun, currentRound);
-  return roundResults; //deckStatus, runStatus, roundStatus
+  return roundResults; //cardDeck, runStatus, roundStatus
 }
 
 
@@ -154,22 +159,27 @@ function buildRoundInstructions(playOnly=true, len=4, selectSize=5){
 
 //TODO: shopping instructions on how to select, reroll? How to interface
 //with shelves?
-//type ShopInstruction = ??? //FIXME:
-function goShopping(baseDeck:DeckStatus, baseRun:RunStatus, instructions:any[]){
+function goShopping(baseDeck:CardDeck, baseRun:RunStatus){ //, instructions:any[])
 
   let currentDeck = structuredClone(baseDeck);
   let currentRun = structuredClone(baseRun);
 
   //Stock shop
+  let newStock = stockShop(currentRun);
+  console.log(newStock);
 
   //(while loop) buy item or end shopping
 
   //how to open packs?
   return {
-    deckStatus: currentDeck,
+    cardDeck: currentDeck,
     runStatus: currentRun,
   }
 }
+
+
+playGame();
+
 //start round (shuffle deck)
 //draw hand
 //select 1-5 cards (may need to have an order shuffle test here)
