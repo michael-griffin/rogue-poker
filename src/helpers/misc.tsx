@@ -25,11 +25,19 @@ import {
   CardDeck,
   TarotFnResult,
 } from '../types/misc'
-import {baseHandSize, rankNames, chipValues, shopInfo, allVouchers,
-  scoreGoals, baseScores, levelUps} from './constants';
+import {baseHandSize, rankNames, chipValues, shopInfo,
+  scoreGoals, baseScores, levelUps,
+  allEnhancements, allSpecials, allSeals, allVouchers} from './constants';
 
 
-import { resetDeck } from './cards/cards';
+import {
+  buildCardDeck,
+  dealCards,
+  makeRandomCards,
+  //enhanceCard, //TODO: remove all instances of enhanceCard, stick with card[key] = val
+  makeStartingCards,
+  resetDeck,
+} from './cards/cards';
 
 import { allTarotFunctions, allTarotsList, dealTarots } from './cards/tarots';
 import { allPlanetsList, dealPlanets, levelUpHand } from './cards/planets';
@@ -233,6 +241,8 @@ function usePack(pack:Pack, baseDeck:CardDeck, baseRun:RunStatus,
 
     // currentDeck = result['cardDeck'];
     // currentRun = result['runStatus'];
+  } else if (packType === 'card'){
+
   }
 
   return {
@@ -241,9 +251,17 @@ function usePack(pack:Pack, baseDeck:CardDeck, baseRun:RunStatus,
   }
 }
 
-// function openCardPack(){
+function openCardPack(pack:Pack){
+  let {cardCount, packType} = pack;
+  if (packType !== 'card') throw new Error('incorrect pack passed');
 
-// }
+  let cardDeck = buildCardDeck();
+  const randomCards = makeRandomCards();
+  cardDeck['deck'] = randomCards;
+
+  cardDeck = dealCards(cardDeck, cardCount);
+  return cardDeck;
+}
 
 
 function openPlanetPack(pack:Pack){
@@ -436,7 +454,12 @@ export function chooseSimple(count:number, maxSize:number=baseHandSize){
   return indices;
 }
 
-
+/** Given an array, returns a random element */
+export function pickRandom(base:any[]){
+  let arr = structuredClone(base);
+  let choice = Math.floor(Math.random() * arr.length);
+  return arr[choice];
+}
 
 /** Given an array, returns a new array with shuffled contents */
 export function shuffle(base:any[]) {

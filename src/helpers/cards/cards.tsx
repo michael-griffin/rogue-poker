@@ -10,9 +10,10 @@ import {
   CardDeck
 } from '../../types/misc';
 
-import {rankNames, chipValues} from '../constants';
+import {rankNames, chipValues, shopInfo,
+  allEnhancements, allSpecials, allSeals } from '../constants';
 
-import { shuffle } from '../misc';
+import { shuffle, pickRandom } from '../misc';
 
 
 type RankInfo = {
@@ -70,7 +71,9 @@ type EnhanceCardParams = {
   seal: Seal | null,
 }
 */
-export function enhanceCard(
+
+/*
+export function enhanceCard( //mostly useless, easier to just do key = value
   card: Card,
   enhanced=null as Enhancement | null,
   special=null as SpecialCardMod | null,
@@ -83,6 +86,7 @@ export function enhanceCard(
 
   return card;
 }
+*/
 
 export function findCards(deck:Card[], searchType:'suit'|'rank', match:Suit|RankNum){
   let foundCards: Card[] = [];
@@ -114,10 +118,23 @@ export function findCards(deck:Card[], searchType:'suit'|'rank', match:Suit|Rank
 
 //   }
 // }
+export function buildSimpleDeck(): Card[]{
+  const ranks = Array(5).fill(0).map((_, ind) => ind+1) as RankNum[];
+  const suits: Suit[] = ['hearts', 'spades']; //'diamonds', 'clubs',
+
+  let newDeck = [];
+  for (let suit of suits) {
+    for (let rank of ranks){
+      let newCard = makeCard(rank, suit);
+      newDeck.push(newCard);
+    }
+  }
+  return newDeck;
+}
 
 export function buildCardDeck(deck: Card[]=[]): CardDeck {
   if (deck.length === 0){
-    deck = buildStartDeck();
+    deck = makeStartingCards();
   }
 
   const cardDeckTemplate = {
@@ -134,33 +151,55 @@ export function buildCardDeck(deck: Card[]=[]): CardDeck {
 }
 
 
-export function buildStartDeck(): Card[] {
+export function makeStartingCards(): Card[] {
   const ranks = Array(13).fill(0).map((_, ind) => ind+1) as RankNum[];
   const suits: Suit[] = ['hearts', 'diamonds', 'spades', 'clubs'];
 
-  let newDeck = [];
+  let startingCards = [];
   for (let suit of suits) {
     for (let rank of ranks){
       let newCard = makeCard(rank, suit);
-      newDeck.push(newCard);
+      startingCards.push(newCard);
     }
   }
-  return newDeck;
+  return startingCards;
 }
 
+/** Make 52 random cards.
+ * - Upgrades are included at .2 chance overall
+ * - weighted 10/5/2 for enhance/special/seal
+*/
+export function makeRandomCards(upgrade=true): Card[] {
+  let randomCards = makeStartingCards();
 
-export function buildSimpleDeck(): Card[]{
-  const ranks = Array(5).fill(0).map((_, ind) => ind+1) as RankNum[];
-  const suits: Suit[] = ['hearts', 'spades']; //'diamonds', 'clubs',
+  if (upgrade){
+    const { upgradeChance, cardUpgradeRates } = shopInfo;
+    let possUpgradeTypes = [];
+    for (let [category, quantity] of Object.entries(cardUpgradeRates)){
+      for (let i = 0; i < quantity; i++){
+        possUpgradeTypes.push(category);
+      }
+    }
+    possUpgradeTypes = shuffle(possUpgradeTypes);
 
-  let newDeck = [];
-  for (let suit of suits) {
-    for (let rank of ranks){
-      let newCard = makeCard(rank, suit);
-      newDeck.push(newCard);
+
+    for (let i = 0; i < randomCards.length; i++){
+      let upgradeRoll = Math.random();
+
+      if (upgradeRoll < upgradeChance){
+        let upgradeType = pickRandom(possUpgradeTypes);
+        let upgradedCard: Card = randomCards[i];
+        if (upgradeType === 'enhanced') upgradedCard['enhanced'] = pickRandom(allEnhancements);
+        if (upgradeType === 'special') upgradedCard['special'] = pickRandom(allSpecials);
+        if (upgradeType === 'seal') upgradedCard['seal'] = pickRandom(allSeals);
+        randomCards[i] = upgradedCard;
+      }
     }
   }
-  return newDeck;
+
+
+  randomCards = shuffle(randomCards);
+  return randomCards;
 }
 
 
@@ -289,13 +328,14 @@ const cardDeckFns = {
   unselectAllCards,
   buildCardDeck,
   buildSimpleDeck,
-  buildStartDeck,
   resetDeck,
 }
 
 const cardFns = {
   getRankInfo,
   makeCard,
-  enhanceCard,
+  //enhanceCard, //cutting: just use card[upgradeType] = val;
+  makeStartingCards,
+  makeRandomCards,
   findCards,
 }

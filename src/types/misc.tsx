@@ -177,7 +177,7 @@ export type HandRecord = {
 
 export type ShelfItem = {category: string, item:Joker|Card|Tarot|Planet};
 export type Pack = {
-  packType: 'planet'|'tarot',
+  packType: 'planet'|'tarot'|'card',
   size: 'normal'|'jumbo'|'mega',
   cardCount: 4|5|6,
   version: 1|2,

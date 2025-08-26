@@ -1,4 +1,4 @@
-import { VoucherTypes } from "../types/misc";
+import { Enhancement, Seal, SpecialCardMod, VoucherTypes } from "../types/misc";
 
 export const scoreGoals = {
   normal: [100, 300, 800, 2000, 5000, 11000, 20000, 35000, 50000],
@@ -31,8 +31,24 @@ export const shopInfo = {
   sellPrices: {
     planet: 1,
     tarot: 1,
-  }
+  },
+  cardUpgradeRates: {
+    enhanced: 10,
+    special: 5,
+    seal: 2,
+  },
+  upgradeChance: .2,
 };
+// export type Enhancement = "bonus" | "mult" | "wild" | "glass" | "steel" |
+//   "stone" | "gold" | "lucky";
+// export type SpecialCardMod = "foil" | "holo" | "poly";
+// type SpecialJokerMod = SpecialCardMod;
+// export type Seal = "red" | "blue" | "purple" | "gold";
+export const allEnhancements: Enhancement[] = [
+  'bonus', 'glass', 'gold', 'lucky', 'mult', 'steel', 'stone', 'wild'
+];
+export const allSpecials: SpecialCardMod[] = ['foil', 'holo', 'poly'];
+export const allSeals: Seal[] = ['blue', 'gold', 'purple', 'red'];
 
 //excluding:
 //bossReroll, hieroglyph, 'planet', tarot, 'telescope', 'shopCards', 'specialCards'
