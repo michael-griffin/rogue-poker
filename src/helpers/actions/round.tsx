@@ -39,10 +39,8 @@ export function finishRound(baseDeck:CardDeck,
   const moneyForInterest = Math.floor(currentRun['currentMoney'] / 5);
   currentRun['currentMoney'] += moneyForHands + moneyForInterest;
 
-
   //build new roundStatus
   let cleanRoundStats = buildRoundStatus(currentRun['hands'], currentRun['discards']);
-
 
   return {
     cardDeck: cleanDeck,

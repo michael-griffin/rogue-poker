@@ -141,8 +141,12 @@ export type PlanetDeck = {
   selectedCards: boolean[],
 }
 
-
-
+//export type BroadCard = Card|Planet|Tarot;
+export type BroadDeck = {
+  deck: (Card|Planet|Tarot)[],
+  dealtCards: (Card|Planet|Tarot)[],
+  selectedCards: boolean[],
+}
 
 //FIXME: string is less specific, but using HandTypes or [key in HandTypes]: Card[]
 //has TS expect ALL of the provided handtypes

@@ -2,7 +2,7 @@
 
 //https://balatrogame.fandom.com/wiki/Tarot_Cards
 
-import {shuffle} from '../misc';
+import {shuffle} from '../actions/misc';
 
 import { Tarot,
   TarotDeck,
@@ -36,7 +36,7 @@ const baseTarot = {
 /** Wrapper for calling tarot functions, confirms
  * cardCounts are correct, then calls relevant TarotFn.
  * returns success status, and updated deck + runStatus */
-function useTarot(baseDeck:CardDeck, baseRun:RunStatus,
+export function useTarot(baseDeck:CardDeck, baseRun:RunStatus,
   tarotCard:Tarot): TarotFnResult {
 
   let selectedCount = baseDeck.selectedCards.reduce((totalCount, selected) => {

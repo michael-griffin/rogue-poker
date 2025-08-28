@@ -1,4 +1,8 @@
 import {
+  CardDeck,
+  PlanetDeck,
+  TarotDeck,
+  BroadDeck,
   RunStatus,
   ShopStock,
   ShelfItem,
@@ -7,17 +11,32 @@ import {
   Planet,
   Tarot,
   Joker,
-  Card
+  Card,
+
 } from '../../types/misc';
 
 //import {baseHandSize, rankNames, chipValues, shopInfo, allVouchers,
 //  scoreGoals, baseScores, levelUps} from './constants';
-import { allVouchers, shopInfo } from "../constants";
-import { shuffle } from '../misc';
-import { allTarotsList } from '../cards/tarots'; //allTarotFunctions, dealTarots
-import { allPlanetsList } from '../cards/planets'; //, dealPlanets, levelUpHand
+import { allVouchers, baseHandSize, shopInfo } from "../constants";
+import { chooseIndices, shuffle } from './misc';
+import {
+  addToDeck,
+  getSelectedCards,
+  selectCards,
+  buildCardDeck,
+  makeRandomCards,
+  dealCards,
+  resetDeck,
+ } from '../cards/cards';
+import { allPlanetsList, dealPlanets, usePlanet } from '../cards/planets'; //, dealPlanets, levelUpHand
+import { allTarotsList, useTarot,  dealTarots } from '../cards/tarots'; //allTarotFunctions, dealTarots
 import { allJokerFunctions, findActiveJokers,  // uncommonJokers
   commonJokersList, uncommonJokersList, rareJokersList } from "../cards/jokers";
+
+//FIXME: Add this!
+// function buyItem(stock, category:'shelf'|'voucher'|'pack', ind=0){
+
+// }
 
 /** Builds an empty Shop object holding a shelf, packs, and a voucher,
  * then stocks it.
@@ -133,3 +152,90 @@ function buildPackVariations(){
 }
 
 
+export function usePack(pack:Pack, baseDeck:CardDeck, baseRun:RunStatus,
+  choiceType:('simple'|'random'|'manual')='simple'){
+
+  let currentDeck = structuredClone(baseDeck);
+  let currentRun = structuredClone(baseRun);
+
+  let {packType, cardCount} = pack;
+  let opened:BroadDeck = openPack(pack);
+  //TODO: can make this fancy by allowing multiple choices
+  //We could do the below multiple times, and adjust
+  //opened to remove the already used card/tarot/planet
+
+  let indices = chooseIndices(choiceType, 1, cardCount);
+  opened = selectCards(opened, indices);
+  let chosen = getSelectedCards(opened)[0];
+
+  if (packType === 'card'){
+    let card = chosen as Card;
+    currentDeck = addToDeck(currentDeck, card);
+
+  } else if (packType === 'planet'){
+    let planet = chosen as Planet;
+    currentRun = usePlanet(currentRun, planet);
+
+  } else if (packType === 'tarot'){
+    let tarot = chosen as Tarot;
+
+    //Tarot Packs sometimes need an additional choice: cards
+    let chooseCount = tarot['cardsUsed'][tarot.cardsUsed.length - 1]; //use max
+    if (chooseCount > 0){
+      console.log('for tarot packs, we also need a card selection');
+      currentDeck = dealCards(currentDeck, baseHandSize);
+      let inds = chooseIndices(choiceType, chooseCount, baseHandSize);
+      currentDeck = selectCards(currentDeck, inds) as CardDeck;
+    }
+
+    let result = useTarot(currentDeck, currentRun, tarot);
+
+    if (result['status'] !== 'invalid'){ //technically unnecessary, would be unchanged
+      currentDeck = result['cardDeck'];
+      currentRun = result['runStatus'];
+    }
+  }
+
+  currentDeck = resetDeck(currentDeck); //clear any dealt cards from using a Tarot Pack
+  return {
+    cardDeck: currentDeck,
+    runStatus: currentRun,
+  }
+}
+
+
+/** Opens a pack, creating a new BroadDeck, with pack's cardCount dealt cards */
+function openPack(pack:Pack): BroadDeck {
+  let { packType } = pack;
+  let newDeck: BroadDeck;
+  if (packType === 'card') newDeck = openCardPack(pack);
+  else if (packType === 'planet') newDeck = openPlanetPack(pack);
+  else newDeck = openTarotPack(pack); //(packType === 'tarot')
+
+  return newDeck;
+}
+function openCardPack(pack:Pack): CardDeck {
+  let {cardCount, packType} = pack;
+  if (packType !== 'card') throw new Error('incorrect pack passed');
+
+  let cardDeck = buildCardDeck();
+  const randomCards = makeRandomCards();
+  cardDeck['deck'] = randomCards;
+
+  cardDeck = dealCards(cardDeck, cardCount);
+  return cardDeck;
+}
+function openPlanetPack(pack:Pack): PlanetDeck {
+  let {cardCount, packType} = pack;
+  if (packType !== 'planet') throw new Error('incorrect pack passed');
+
+  const planetDeck = dealPlanets(cardCount);
+  return planetDeck;
+}
+function openTarotPack(pack:Pack): TarotDeck {
+  let {cardCount, packType} = pack;
+  if (packType !== 'tarot') throw new Error('incorrect pack passed');
+
+  const tarotDeck:TarotDeck = dealTarots(cardCount); //deals tarot cards, sets up select
+  return tarotDeck;
+}
