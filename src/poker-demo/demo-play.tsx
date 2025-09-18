@@ -1,4 +1,4 @@
-import { stockShop } from '../helpers/actions/shop';
+import { buyItem, stockShop } from '../helpers/actions/shop';
 import { buildRunStatus } from '../helpers/actions/run';
 import { buildRoundStatus, finishRound } from '../helpers/actions/round';
 import {
@@ -12,13 +12,18 @@ import {checkStraight, checkFlush} from '../helpers/check';
 import {
   shuffle,
   chooseRandom,
- } from '../helpers/misc';
+ } from '../helpers/actions/misc';
 import {
   CardDeck,
   RunStatus,
   RoundStatus,
 } from '../types/misc';
 
+
+
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const readline = require('readline-sync');
 
 
 let myDeck = buildCardDeck();
@@ -163,13 +168,34 @@ function goShopping(baseDeck:CardDeck, baseRun:RunStatus){ //, instructions:any[
 
   let currentDeck = structuredClone(baseDeck);
   let currentRun = structuredClone(baseRun);
+  console.log('current Run: ', currentRun);
 
   //Stock shop
   let newStock = stockShop(currentRun);
   console.log(newStock);
-
+  console.log(newStock.shelf[0])
   //(while loop) buy item or end shopping
 
+  console.log('would you like to buy an item?' )
+  let resp = readline.question("Enter y/n \n");
+
+  if (resp === 'n'){
+    console.log('alright, ending shopping');
+  } else {
+    let resp:'shelf'|'vouchers'|'packs' = readline.question(
+      'Buy from shelf, vouchers, or packs?\n');
+    while (!['shelf','vouchers','packs'].includes(resp)){
+      resp = readline.question("please enter 'shelf', 'vouchers', or 'packs'\n");
+    }
+    let area = resp;
+    resp = readline.question('Which position? 0 or 1\n');
+
+    let ind = +resp;
+
+    let item = newStock[area][ind];
+    let result = buyItem(currentDeck, currentRun, item);
+
+  }
   //how to open packs?
   return {
     cardDeck: currentDeck,
