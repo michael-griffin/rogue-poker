@@ -95,6 +95,22 @@ export function getRankInfo(rank: RankNum): RankInfo {
   return rankInfo;
 }
 
+
+export function findCards(cards:Card[], searchType:'suit'|'rank', match:Suit|RankNum){
+  let foundCards: Card[] = [];
+  if (searchType === 'suit'){
+    foundCards = cards.filter(card => {
+      if (card.suit === match) return true;
+    });
+  } else if (searchType === 'rank'){
+    foundCards = cards.filter(card => {
+      if (card.rank === match) return true;
+    });
+  }
+  return foundCards;
+}
+
+
 export function makeCard(rank: RankNum, suit:Suit): Card {
   const rankInfo = getRankInfo(rank);
   const name = rankInfo['name'] as RankName;
@@ -114,77 +130,69 @@ export function makeCard(rank: RankNum, suit:Suit): Card {
   return card;
 }
 
-export function findCards(cards:Card[], searchType:'suit'|'rank', match:Suit|RankNum){
-  let foundCards: Card[] = [];
-  if (searchType === 'suit'){
-    foundCards = cards.filter(card => {
-      if (card.suit === match) return true;
-    });
-  } else if (searchType === 'rank'){
-    foundCards = cards.filter(card => {
-      if (card.rank === match) return true;
-    });
-  }
-  return foundCards;
-}
-
 
 /***************** */
 /** DECK Functions */
 /***************** */
-export function buildSimpleDeck(): Card[]{
-  const ranks = Array(5).fill(0).map((_, ind) => ind+1) as RankNum[];
-  const suits: Suit[] = ['hearts', 'spades']; //'diamonds', 'clubs',
 
-  let newDeck = [];
-  for (let suit of suits) {
-    for (let rank of ranks){
-      let newCard = makeCard(rank, suit);
-      newDeck.push(newCard);
-    }
-  }
-  return newDeck;
-}
 
-export function buildCardDeck(deck: Card[]=[]): CardDeck {
-  if (deck.length === 0){
-    deck = makeStartingCards();
+export function buildCardDeck(cards: Card[]=[]): CardDeck {
+  if (cards.length === 0){
+    cards = makeStandardCards();
   }
 
   const cardDeckTemplate = {
-    deck: structuredClone(deck), //when moving to react, need to avoid mutating.
+    deck: structuredClone(cards), //when moving to react, need to avoid mutating.
     dealtCards: [], //handSize active cards, can be played or discarded.
     selectedCards: [],
     playedCards: [],
     unplayedCards: [],
     usedCards: [], //discarded or played
-    remainingCards: structuredClone(deck), //deck remaining
+    remainingCards: structuredClone(cards), //deck remaining
   }
 
   return cardDeckTemplate;
 }
 
 
-export function makeStartingCards(): Card[] {
-  const ranks = Array(13).fill(0).map((_, ind) => ind+1) as RankNum[];
-  const suits: Suit[] = ['hearts', 'diamonds', 'spades', 'clubs'];
+/** Makes 10 cards: Ace-5, for hearts and spades */
+export function makeSimpleCards(): Card[]{
+  const ranks = Array(5).fill(0).map((_, ind) => ind+1) as RankNum[];
+  const suits: Suit[] = ['hearts', 'spades']; //'diamonds', 'clubs',
 
-  let startingCards = [];
+  let cards = [];
   for (let suit of suits) {
     for (let rank of ranks){
       let newCard = makeCard(rank, suit);
-      startingCards.push(newCard);
+      cards.push(newCard);
     }
   }
-  return startingCards;
+  return cards;
 }
+
+
+/** Makes the 52 standard cards, with no enhancements or special editions*/
+export function makeStandardCards(): Card[] {
+  const ranks = Array(13).fill(0).map((_, ind) => ind+1) as RankNum[];
+  const suits: Suit[] = ['hearts', 'diamonds', 'spades', 'clubs'];
+
+  let cards = [];
+  for (let suit of suits) {
+    for (let rank of ranks){
+      let newCard = makeCard(rank, suit);
+      cards.push(newCard);
+    }
+  }
+  return cards;
+}
+
 
 /** Make 52 random cards.
  * - Upgrades are included at .2 chance overall
  * - weighted 10/5/2 for enhance/special/seal
 */
 export function makeRandomCards(upgrade=true): Card[] {
-  let randomCards = makeStartingCards();
+  let cards = makeStandardCards();
 
   if (upgrade){
     const { upgradeChance, cardUpgradeRates } = shopInfo;
@@ -196,24 +204,22 @@ export function makeRandomCards(upgrade=true): Card[] {
     }
     possUpgradeTypes = shuffle(possUpgradeTypes);
 
-
-    for (let i = 0; i < randomCards.length; i++){
+    for (let i = 0; i < cards.length; i++){
       let upgradeRoll = Math.random();
 
       if (upgradeRoll < upgradeChance){
         let upgradeType = pickRandom(possUpgradeTypes);
-        let upgradedCard: Card = randomCards[i];
+        let upgradedCard: Card = cards[i];
         if (upgradeType === 'enhanced') upgradedCard['enhanced'] = pickRandom(allEnhancements);
         if (upgradeType === 'special') upgradedCard['special'] = pickRandom(allSpecials);
         if (upgradeType === 'seal') upgradedCard['seal'] = pickRandom(allSeals);
-        randomCards[i] = upgradedCard;
+        cards[i] = upgradedCard;
       }
     }
   }
 
-
-  randomCards = shuffle(randomCards);
-  return randomCards;
+  cards = shuffle(cards);
+  return cards;
 }
 
 
@@ -261,13 +267,8 @@ export function dealCards(baseDeck:CardDeck, numCards: number): CardDeck {
 }
 
 
-
-
-
-
-/** move selectedCards to usedCards
- * deal selectedCard.length new cards from remaining
- */
+/** Given a CardDeck, moves selectedCards to usedCards and
+ * deals selectedCard.length new cards from remaining */
 export function discardCards(baseDeck: CardDeck): CardDeck {
   const newDeck = structuredClone(baseDeck);
   const {dealtCards, selectedCards} = baseDeck;
@@ -340,22 +341,17 @@ const cardDeckFns = {
   addToHand,
   addToDeck,
   buildCardDeck,
-  buildSimpleDeck,
   resetDeck,
 }
 
 const cardFns = {
-  getRankInfo,
-  makeCard,
   //enhanceCard, //cutting: just use card[upgradeType] = val;
-  makeStartingCards,
-  makeRandomCards,
+  getRankInfo,
   findCards,
+  makeCard,
+  makeSimpleCards,
+  makeStandardCards,
+  makeRandomCards,
 }
 
 
-
-
-/************** */
-/*NO LONGER USED*/
-/************** */
