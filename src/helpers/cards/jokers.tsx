@@ -145,6 +145,28 @@ function arrowheadFn(card: Card){
 }
 
 
+export const fourFingers: Joker = {
+  name: 'fourFingers',
+  special: null,
+  negative: false,
+  rarity: 'uncommon',
+  price: 7,
+  sellValue: 3,
+  activePhase: 'passive',
+  description: 'can play straights and flushes with 4 cards. Still scores 5th',
+}
+
+export const shortcut: Joker = {
+  name: 'shortcut',
+  special: null,
+  negative: false,
+  rarity: 'uncommon',
+  price: 7,
+  sellValue: 3,
+  activePhase: 'passive',
+  description: 'Allows Straights to be made with gaps of 1 rank (ex: 10 8 6 5 3)',
+}
+
 /*****************/
 /** RARE JOKERS **/
 /*****************/
@@ -207,6 +229,8 @@ export const allJokerFunctions: AllJokerFunctions = {
   'smileyFace': smileyFaceFn,
   'bloodstone': bloodstoneFn,
   'arrowhead': arrowheadFn,
+  //fourFingers is passive
+  //shortcut is passive
   'theDuo': theDuoFn,
   'theTrio': theTrioFn,
 
@@ -221,6 +245,8 @@ export const allJokers:Jokers = {
   smileyFace,
   bloodstone,
   arrowhead,
+  fourFingers,
+  shortcut,
   theDuo,
   theTrio,
 }
