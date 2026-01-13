@@ -181,10 +181,6 @@ export function checkMultPairs(hand: Card[],
 // }
 
 
-type CheckStraightFn = (hand: Card[], jokers: Joker[]) =>
-  {scoredCards: Card[], isStraight: boolean } | null;
-
-
 /** Checks for straights. Straights can be standard or ace high.
  * - with fourFingers joker, straights require only 4 valid cards for the hand to score
  * - with shortcut joker, straights can have gaps of 1 rank
@@ -239,6 +235,10 @@ type CheckStraightfn = (hand: Card[], jokers: Joker[]) => CheckResult
 checkStraight satisfies CheckStraightfn
 
 
+/** Checks for flushes.
+ * - with fourFingers joker, flushes require only 4 valid cards.
+ * - with smearedJoker, flushes can be made by color, rather than suit.
+ */
 export function checkFlush(hand: Card[], jokers: Joker[] = []): CheckResult {
   let match: boolean = false;
   let handType: HandTypes = 'flush';
@@ -267,29 +267,11 @@ export function checkFlush(hand: Card[], jokers: Joker[] = []): CheckResult {
     }
   }
 
-
   if (checkType === 'suits'){
     for (let key in suitCounts){
       if (suitCounts[key as SuitKey] + wildCount >= minSize){
         match = true;
       }
-    }
-
-    if (match){
-      let highSuit:SuitKey;
-      let highCount = Math.max(...Object.values(suitCounts));
-      let suits:SuitKey[] = Object.keys(suitCounts) as SuitKey[];
-      for (let suit of suits){
-        if (suitCounts[suit] === highCount) {
-          highSuit = suit;
-          break;
-        }
-      }
-
-      scoredCards = hand.map(({suit, enhanced}:Card) => {
-        const scored = (suit === highSuit || enhanced === 'wild' || enhanced === 'stone');
-        return scored;
-      })
     }
   } else if (checkType === 'colors'){
     let redCount = suitCounts['diamonds'] + suitCounts['hearts'];
@@ -297,23 +279,124 @@ export function checkFlush(hand: Card[], jokers: Joker[] = []): CheckResult {
     if (redCount + wildCount > minSize || blackCount + wildCount > minSize){
       match = true;
     }
-
-    if (match){
-      let highSuit:SuitKey[];
-      if (redCount > blackCount) {
-        highSuit = ['hearts', 'diamonds'];
-      } else {
-        highSuit = ['clubs', 'spades'];
-      }
-
-      scoredCards = hand.map(({suit, enhanced}:Card) => {
-        const scored = (highSuit.includes(suit)||enhanced==='wild'||enhanced==='stone');
-        return scored;
-      })
-    }
   }
 
+  if (match) scoredCards = Array(hand.length).fill(true);
   return { match, handType, scoredCards };
 }
 type CheckFlushFn = (hand: Card[], jokers: Joker[]) => CheckResult
 checkFlush satisfies CheckFlushFn;
+
+
+/** Checks for straight flushes, but not royal flushes
+ *  fourFingers + shortcut jokers work as they do in checkFlush + checkStraight */
+export function checkStraightFlush(hand:Card[], jokers:Joker[]): CheckResult {
+  let match = false;
+  let handType:HandTypes = 'straightFlush';
+  let scoredCards = Array(hand.length).fill(false);
+
+  const flushResult = checkFlush(hand, jokers);
+  const straightResult = checkStraight(hand, jokers);
+  if (flushResult.match && straightResult.match) match = true;
+
+  if (match) scoredCards = Array(hand.length).fill(true);
+  return { match, handType, scoredCards };
+}
+
+
+/** Checks for Royal Flushes using straightFlush */
+export function checkRoyalFlush(hand:Card[], jokers:Joker[]): CheckResult {
+  let {match, handType, scoredCards} = checkStraightFlush(hand, jokers);
+  handType = 'royalFlush';
+
+  const sortedHand = hand.sort((cardA, cardB) => cardA.rank - cardB.rank);
+  let sortedNames = sortedHand.map(card => card.name).join('-');
+  const royalFlushCheck = 'ace-10-jack-queen-king';
+  if (sortedNames === royalFlushCheck) match = true;
+
+  return { match, handType, scoredCards };
+}
+
+/******************/
+/** OLD VERSIONS **/
+/******************/
+
+
+// //This version excludes 'irrelevant' cards from scoring when fourFingers
+// //is present. Simplified to keep consistent with straight.
+// export function checkFlush(hand: Card[], jokers: Joker[] = []): CheckResult {
+//   let match: boolean = false;
+//   let handType: HandTypes = 'flush';
+//   let scoredCards: boolean[] = Array(hand.length).fill(false);
+
+//   let minSize = 5;
+//   let checkType:'suits'|'colors' = 'suits';
+//   const jokerNames = jokers.map(({ name } : Joker) => name);
+//   if (jokerNames.includes('fourFingers')) minSize = 4;
+//   if (jokerNames.includes('smearedJoker')) checkType = 'colors';
+
+//   type SuitKey = "clubs" | "diamonds" | "hearts" | "spades"
+//   const suitCounts = {
+//     spades: 0,
+//     hearts: 0,
+//     clubs: 0,
+//     diamonds: 0,
+//   }
+//   let wildCount = 0;
+
+//   for (let card of hand){
+//     if (card.enhanced === "wild"){
+//       wildCount++;
+//     } else if (card.enhanced !== "stone"){
+//       suitCounts[card.suit] += 1;
+//     }
+//   }
+
+
+//   if (checkType === 'suits'){
+//     for (let key in suitCounts){
+//       if (suitCounts[key as SuitKey] + wildCount >= minSize){
+//         match = true;
+//       }
+//     }
+
+//     if (match){
+//       let highSuit:SuitKey;
+//       let highCount = Math.max(...Object.values(suitCounts));
+//       let suits:SuitKey[] = Object.keys(suitCounts) as SuitKey[];
+//       for (let suit of suits){
+//         if (suitCounts[suit] === highCount) {
+//           highSuit = suit;
+//           break;
+//         }
+//       }
+
+//       scoredCards = hand.map(({suit, enhanced}:Card) => {
+//         const scored = (suit === highSuit || enhanced === 'wild' || enhanced === 'stone');
+//         return scored;
+//       })
+//     }
+//   } else if (checkType === 'colors'){
+//     let redCount = suitCounts['diamonds'] + suitCounts['hearts'];
+//     let blackCount = suitCounts['clubs'] + suitCounts['spades'];
+//     if (redCount + wildCount > minSize || blackCount + wildCount > minSize){
+//       match = true;
+//     }
+
+//     if (match){
+//       let highSuit:SuitKey[];
+//       if (redCount > blackCount) {
+//         highSuit = ['hearts', 'diamonds'];
+//       } else {
+//         highSuit = ['clubs', 'spades'];
+//       }
+
+//       scoredCards = hand.map(({suit, enhanced}:Card) => {
+//         const scored = (highSuit.includes(suit)||enhanced==='wild'||enhanced==='stone');
+//         return scored;
+//       })
+//     }
+//   }
+
+//   return { match, handType, scoredCards };
+// }
